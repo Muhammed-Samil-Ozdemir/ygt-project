@@ -165,3 +165,4 @@ Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. E
 - [x] Backend API: herkese açık ve admin uçları, JWT, istek sınırı, Excel, sertifika görseli, Docker
 - [x] Angular ön yüz: site ve yönetim paneli
 - [x] Tek Docker kurulumu: nginx ön yüzü sunar, `/api` isteklerini API'ye yönlendirir
+- [ ] Sitenin içeriğini panelden yönetmek ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)
