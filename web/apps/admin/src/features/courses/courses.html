@@ -1,0 +1,57 @@
+<div class="page-header">
+  <h1>Eğitimler</h1>
+  <a class="btn btn-primary" routerLink="new">Yeni eğitim</a>
+</div>
+
+@let courseList = courses();
+@if (courseList === null) {
+  <p class="muted">Yükleniyor...</p>
+} @else if (courseList.length === 0) {
+  <div class="card empty">Henüz eğitim yok.</div>
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Eğitim</th>
+          <th>Durum</th>
+          <th>Başvuru</th>
+          <th>Oluşturulma</th>
+          <th><span class="visually-hidden">İşlemler</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (course of courseList; track course.id) {
+          <tr>
+            <td>
+              <strong>{{ course.title }}</strong>
+              @if (course.content) {
+                <div class="muted small clamp">{{ course.content }}</div>
+              }
+            </td>
+            <td>
+              @if (course.isActive) {
+                <span class="badge badge-success">Başvuruya açık</span>
+              } @else {
+                <span class="badge">Kapalı</span>
+              }
+            </td>
+            <td>{{ course.applicationCount }}</td>
+            <td class="nowrap">{{ course.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              <div class="actions">
+                <a class="btn btn-outline btn-sm" [routerLink]="[course.id, 'applications']">Başvurular</a>
+                <a class="btn btn-ghost btn-sm" [routerLink]="[course.id, 'edit']">Düzenle</a>
+                @if (course.isActive) {
+                  <button type="button" class="btn btn-danger btn-sm" (click)="setActive(course, false)">Kapat</button>
+                } @else {
+                  <button type="button" class="btn btn-outline btn-sm" (click)="setActive(course, true)">Aç</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

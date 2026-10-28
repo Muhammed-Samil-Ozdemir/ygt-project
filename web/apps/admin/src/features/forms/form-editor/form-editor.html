@@ -1,0 +1,53 @@
+<div class="page-header">
+  <h1>{{ id() ? 'Formu düzenle' : 'Yeni form' }}</h1>
+</div>
+
+<div class="card editor-card">
+  @if (!loaded()) {
+    <p class="muted">Yükleniyor...</p>
+  } @else {
+    <form class="stack" (ngSubmit)="save()" novalidate>
+      <div class="field">
+        <label for="title">Başlık</label>
+        <input id="title" class="input" name="title" [(ngModel)]="model.title" />
+      </div>
+
+      <div class="field">
+        <label for="content">Açıklama <span class="optional">(isteğe bağlı)</span></label>
+        <textarea id="content" class="textarea" name="content" [(ngModel)]="model.content"></textarea>
+        <p class="hint">Başvuru formunun üstünde görünür. Satır sonları korunur.</p>
+      </div>
+
+      <fieldset>
+        <legend>Başvuru türü</legend>
+        <div class="choice-group">
+          <label class="checkbox">
+            <input type="radio" name="type" value="standard" [disabled]="hasApplications()" [(ngModel)]="model.type" />
+            <span>Bireysel başvuru</span>
+          </label>
+          <label class="checkbox">
+            <input type="radio" name="type" value="hackathon" [disabled]="hasApplications()" [(ngModel)]="model.type" />
+            <span>Takım başvurusu (hackathon)</span>
+          </label>
+        </div>
+        @if (hasApplications()) {
+          <p class="muted small hint-gap">Başvurusu olan formun türü değiştirilemez.</p>
+        }
+      </fieldset>
+
+      @if (!id()) {
+        <p class="notice small">
+          Form başvurulara açık olarak oluşturulur. Şu an açık olan form varsa kapanır ve ana sayfadaki buton
+          "Etkinlik Başvurusu" olur.
+        </p>
+      }
+
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+        <a class="btn btn-ghost" routerLink="/forms">Vazgeç</a>
+      </div>
+    </form>
+  }
+</div>

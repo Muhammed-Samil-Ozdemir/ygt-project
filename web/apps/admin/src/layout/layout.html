@@ -1,0 +1,24 @@
+<header class="admin-header">
+  <div class="container admin-header-inner">
+    <a routerLink="/" class="brand">
+      <img src="images/logo.png" alt="" width="28" height="29" />
+      <span>YGT Yönetim</span>
+    </a>
+
+    <nav class="admin-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Panel</a>
+      <a routerLink="/courses" routerLinkActive="active">Eğitimler</a>
+      <a routerLink="/forms" routerLinkActive="active">Formlar</a>
+      <a routerLink="/certificates" routerLinkActive="active">Sertifikalar</a>
+    </nav>
+
+    <div class="row">
+      <a class="btn btn-ghost btn-sm" href="/" target="_blank" rel="noopener">Siteyi aç</a>
+      <button type="button" class="btn btn-outline btn-sm" (click)="logout()">Çıkış</button>
+    </div>
+  </div>
+</header>
+
+<main class="container admin-main">
+  <router-outlet />
+</main>

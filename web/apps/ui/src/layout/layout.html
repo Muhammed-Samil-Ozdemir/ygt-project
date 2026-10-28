@@ -1,0 +1,59 @@
+<header class="site-header">
+  <div class="container site-header-inner">
+    <a routerLink="/" class="brand" (click)="closeMenu()">
+      <img src="images/logo.png" alt="" width="30" height="32" />
+      <span><span class="brand-accent">Yazılım</span> Geliştirme Topluluğu</span>
+    </a>
+
+    <button
+      type="button"
+      class="btn btn-ghost menu-toggle"
+      aria-controls="site-menu"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="menuOpen.set(!menuOpen())"
+    >
+      Menü
+    </button>
+
+    <nav id="site-menu" class="site-nav" [class.open]="menuOpen()">
+      <a routerLink="/" fragment="about" (click)="closeMenu()">Hakkımızda</a>
+      <a routerLink="/" fragment="team" (click)="closeMenu()">Ekibimiz</a>
+      @if (application(); as application) {
+        <a class="btn btn-outline" [routerLink]="application.link" (click)="closeMenu()">{{ application.label }}</a>
+      }
+      <a class="btn btn-primary" [href]="links.join" target="_blank" rel="noopener">Bize Katılın</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-about">
+      <a routerLink="/" class="brand">
+        <img src="images/logo.png" alt="" width="30" height="32" />
+        <span><span class="brand-accent">Yazılım</span> Geliştirme Topluluğu</span>
+      </a>
+      <p class="muted small">Konya Teknik Üniversitesi bünyesinde 2022'de kurulan öğrenci topluluğu.</p>
+      <a class="small" [href]="links.university" target="_blank" rel="noopener">Konya Teknik Üniversitesi</a>
+    </div>
+
+    <div>
+      <h2 class="footer-title">Bizi takip edin</h2>
+      <ul class="footer-links">
+        <li><a [href]="links.instagram" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a [href]="links.x" target="_blank" rel="noopener">X (Twitter)</a></li>
+        <li><a [href]="links.linkedin" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a [href]="links.discord" target="_blank" rel="noopener">Discord</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom small muted">
+    <span>© {{ year }} Yazılım Geliştirme Topluluğu. Tüm hakları saklıdır.</span>
+    <a href="/admin/">Yönetim paneli</a>
+  </div>
+</footer>

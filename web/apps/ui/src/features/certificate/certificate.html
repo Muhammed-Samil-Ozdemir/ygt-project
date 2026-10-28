@@ -1,0 +1,28 @@
+<div class="container page">
+  <div class="card form-card certificate-card">
+    <p class="eyebrow">Sertifika doğrulama</p>
+
+    @if (certificate(); as certificate) {
+      <div class="stack">
+        <span class="badge badge-success">Geçerli sertifika</span>
+        <h1>{{ certificate.firstName }} {{ certificate.lastName }}</h1>
+        <p class="certificate-course">{{ certificate.courseName }}</p>
+      </div>
+
+      @if (certificate.hasImage) {
+        <img class="certificate-image" [src]="imageUrl()" [alt]="certificate.courseName + ' sertifikası'" />
+      }
+
+      <p class="muted small">
+        Bu sertifika Konya Teknik Üniversitesi Yazılım Geliştirme Topluluğu tarafından verilmiştir.
+      </p>
+    } @else if (notFound()) {
+      <div class="stack">
+        <h1>Sertifika bulunamadı</h1>
+        <p class="muted">Doğrulama kodu hatalı olabilir. Linki kontrol edip tekrar deneyin.</p>
+      </div>
+    } @else {
+      <p class="muted">Yükleniyor...</p>
+    }
+  </div>
+</div>

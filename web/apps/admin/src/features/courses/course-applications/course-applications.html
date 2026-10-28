@@ -1,0 +1,50 @@
+<a class="back-link small" routerLink="/courses">Eğitimler</a>
+
+<div class="page-header">
+  <div>
+    <h1>{{ course()?.title ?? 'Başvurular' }}</h1>
+    <p class="muted">Eğitim başvuruları</p>
+  </div>
+  @if (applications()?.length) {
+    <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
+      {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
+    </button>
+  }
+</div>
+
+@let list = applications();
+@if (list === null) {
+  <p class="muted">Yükleniyor...</p>
+} @else if (list.length === 0) {
+  <div class="card empty">Bu eğitime henüz başvuru yapılmadı.</div>
+} @else {
+  <p class="muted small list-count">{{ list.length }} başvuru</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ad soyad</th>
+          <th>E-posta</th>
+          <th>Telefon</th>
+          @if (hasTcNumber()) {
+            <th>TC kimlik no</th>
+          }
+          <th>Başvuru tarihi</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (application of list; track application.id) {
+          <tr>
+            <td>{{ application.firstName }} {{ application.lastName }}</td>
+            <td>{{ application.email }}</td>
+            <td class="nowrap">{{ application.phoneNumber | phone }}</td>
+            @if (hasTcNumber()) {
+              <td>{{ application.tcNumber }}</td>
+            }
+            <td class="nowrap">{{ application.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

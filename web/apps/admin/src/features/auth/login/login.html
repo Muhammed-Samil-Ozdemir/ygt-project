@@ -1,0 +1,32 @@
+<div class="login-page">
+  <div class="card login-card">
+    <div class="stack login-head">
+      <img src="images/logo.png" alt="" width="52" height="55" />
+      <div>
+        <h1>Yönetim paneli</h1>
+        <p class="muted small">Yazılım Geliştirme Topluluğu</p>
+      </div>
+    </div>
+
+    <form class="stack" (ngSubmit)="login()" novalidate>
+      <div class="field">
+        <label for="email">E-posta</label>
+        <input id="email" class="input" type="email" name="email" autocomplete="username" [(ngModel)]="model.email" />
+      </div>
+      <div class="field">
+        <label for="password">Şifre</label>
+        <input
+          id="password"
+          class="input"
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          [(ngModel)]="model.password"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+        {{ sending() ? 'Giriş yapılıyor...' : 'Giriş yap' }}
+      </button>
+    </form>
+  </div>
+</div>

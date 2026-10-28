@@ -1,0 +1,46 @@
+<div class="page-header">
+  <h1>{{ id() ? 'Sertifikayı düzenle' : 'Yeni sertifika' }}</h1>
+</div>
+
+<div class="card editor-card">
+  @if (!loaded()) {
+    <p class="muted">Yükleniyor...</p>
+  } @else {
+    <form class="stack" (ngSubmit)="save()" novalidate>
+      <div class="field">
+        <label for="courseName">Eğitim adı</label>
+        <input id="courseName" class="input" name="courseName" [(ngModel)]="model.courseName" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="firstName">Ad</label>
+          <input id="firstName" class="input" name="firstName" [(ngModel)]="model.firstName" />
+        </div>
+        <div class="field">
+          <label for="lastName">Soyad</label>
+          <input id="lastName" class="input" name="lastName" [(ngModel)]="model.lastName" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="email">E-posta <span class="optional">(isteğe bağlı)</span></label>
+          <input id="email" class="input" type="email" name="email" [(ngModel)]="model.email" />
+        </div>
+        <div class="field">
+          <label for="phoneNumber">Telefon <span class="optional">(isteğe bağlı)</span></label>
+          <input id="phoneNumber" class="input" type="tel" name="phoneNumber" [(ngModel)]="model.phoneNumber" />
+        </div>
+      </div>
+      <p class="muted small">E-posta ve telefon doğrulama sayfasında görünmez, sadece panelde tutulur.</p>
+
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+        <a class="btn btn-ghost" routerLink="/certificates">Vazgeç</a>
+      </div>
+    </form>
+  }
+</div>

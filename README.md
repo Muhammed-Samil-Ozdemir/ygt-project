@@ -5,8 +5,8 @@ KTÜN Yazılım Geliştirme Topluluğu sitesinin yeni sürümü. Eski Node.js/Ex
 | Klasör / dosya | İçerik |
 |---|---|
 | `server/` | ASP.NET Core 10 Web API (`Ygt.WebAPI`), EF Core + SQL Server |
-| `client/` | Angular ön yüz (sonraki aşamada) |
-| `docker-compose.yml` | SQL Server + API; ön yüz sonraki aşamada eklenecek |
+| `web/` | Angular 22 ön yüz, Nx monorepo: `apps/ui` (site), `apps/admin` (yönetim paneli), `libraries` (ortak kod) |
+| `docker-compose.yml` | SQL Server + API + web (nginx) |
 
 ## Çalıştırma
 
@@ -17,10 +17,17 @@ cp .env.example .env          # yerel geliştirme değerleri hazır gelir; sunuc
 docker compose up -d --build
 ```
 
-API `http://localhost:5080` adresinde açılır (ön yüz eklenene kadar geçici). Sağlık kontrolü: `/health`.
-Admin girişi `.env` içindeki `ADMIN_EMAIL` ve `ADMIN_PASSWORD` ile yapılır.
+| Adres | İçerik |
+|---|---|
+| `http://localhost/` | Site |
+| `http://localhost/admin/` | Yönetim paneli (`.env` içindeki `ADMIN_EMAIL` ve `ADMIN_PASSWORD` ile giriş) |
+| `http://localhost/api/` | API. Dışarıya ayrıca açılmaz, nginx üzerinden erişilir. Sağlık kontrolü: `/api/health` |
 
-### Geliştirme (API Docker dışında)
+80 portu doluysa `.env` içindeki `WEB_PORT` değiştirilir.
+
+### Geliştirme
+
+API ve veritabanı:
 
 ```bash
 docker compose up -d mssql
@@ -32,6 +39,17 @@ dotnet run --project Ygt.WebAPI
 ```
 
 API `http://localhost:5146` adresinde açılır. OpenAPI dokümanı: `http://localhost:5146/openapi/v1.json` (sadece geliştirmede).
+
+Ön yüz (API çalışırken, ayrı terminallerde):
+
+```bash
+cd web
+npm install
+npx nx serve ui               # http://localhost:4200
+npx nx serve admin            # http://localhost:4201/admin/
+```
+
+Geliştirme sunucusu `/api` isteklerini `proxy.conf.json` ile `localhost:5146`'ya yönlendirir; Docker'daki nginx de aynı yolu kullanır.
 
 API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları ve ana sayfa ziyaret sayacı.
 Ayardaki admin şifresi değişirse bir sonraki açılışta veritabanındaki şifre de güncellenir.
@@ -129,9 +147,21 @@ server/Ygt.WebAPI/
   Utilities/        Girdi doğrulama, Türkiye saati
 ```
 
+## Ön yüz klasör yapısı
+
+```
+web/
+  apps/ui/          Site: ana sayfa, eğitim / etkinlik / hackathon başvurusu, geri sayım, sertifika doğrulama
+  apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar
+  libraries/        Ortak kod: HttpService, hata bildirimleri, token, modeller, ortak stiller ve fontlar
+  nginx.conf        Docker'da siteyi, paneli ve /api yönlendirmesini sunar
+```
+
+Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. Eski sertifika linkleri (`/api/certs?certID=...`) yeni doğrulama sayfasına yönlenir.
+
 ## Geçiş durumu
 
 - [x] Veritabanı: şema, migration, seed
 - [x] Backend API: herkese açık ve admin uçları, JWT, istek sınırı, Excel, sertifika görseli, Docker
-- [ ] Angular ön yüz (site + admin paneli)
-- [ ] Tek Docker kurulumu: nginx ön yüzü sunar, `/api` isteklerini API'ye yönlendirir
+- [x] Angular ön yüz: site ve yönetim paneli
+- [x] Tek Docker kurulumu: nginx ön yüzü sunar, `/api` isteklerini API'ye yönlendirir

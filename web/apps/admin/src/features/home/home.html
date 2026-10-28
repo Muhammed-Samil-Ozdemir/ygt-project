@@ -1,0 +1,96 @@
+<div class="page-header">
+  <h1>Panel</h1>
+</div>
+
+<div class="stats">
+  <div class="card stat">
+    <span class="muted small">Ana sayfa ziyareti</span>
+    <strong class="stat-value">{{ visits() ?? '...' }}</strong>
+  </div>
+  <a class="card stat" routerLink="/courses">
+    <span class="muted small">Başvuruya açık eğitim</span>
+    <strong class="stat-value">{{ activeCourses() ?? '...' }}</strong>
+  </a>
+  <a class="card stat" routerLink="/forms">
+    <span class="muted small">Açık etkinlik formu</span>
+    @let form = activeForm();
+    <strong class="stat-text">
+      @if (form === undefined) {
+        ...
+      } @else if (form === null) {
+        Yok
+      } @else {
+        {{ form.title }}
+      }
+    </strong>
+  </a>
+</div>
+
+<section class="card settings-card">
+  <div class="stack">
+    <h2>Site ayarları</h2>
+
+    @if (!settingsLoaded()) {
+      <p class="muted">Yükleniyor...</p>
+    } @else {
+      <form class="stack" (ngSubmit)="saveSettings()" novalidate>
+        <fieldset>
+          <legend>Ana sayfadaki başvuru butonu</legend>
+          <div class="choice-group">
+            <label class="checkbox">
+              <input type="radio" name="homeButton" value="course" [(ngModel)]="settings.homeButton" />
+              <span>Eğitim başvurusu</span>
+            </label>
+            <label class="checkbox">
+              <input type="radio" name="homeButton" value="form" [(ngModel)]="settings.homeButton" />
+              <span>Etkinlik başvurusu</span>
+            </label>
+          </div>
+          <p class="muted small hint-gap">Yeni eğitim ya da form açtığınızda bu ayar kendiliğinden değişir.</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Geri sayım</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="countdownTitle">Başlık</label>
+              <input
+                id="countdownTitle"
+                class="input"
+                name="countdownTitle"
+                placeholder="ör. YGT Hackathon 2026"
+                [(ngModel)]="settings.countdownTitle"
+              />
+            </div>
+            <div class="field">
+              <label for="countdownEndsAt">Bitiş zamanı</label>
+              <input
+                id="countdownEndsAt"
+                class="input"
+                type="datetime-local"
+                name="countdownEndsAt"
+                [(ngModel)]="settings.countdownEndsAt"
+              />
+            </div>
+          </div>
+          <p class="muted small hint-gap">
+            Geri sayım ana sayfada ve
+            <a href="/counter" target="_blank" rel="noopener">/counter</a>
+            sayfasında görünür. Boş bırakırsanız gösterilmez.
+          </p>
+        </fieldset>
+
+        <div class="row">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Kaydediliyor...' : 'Kaydet' }}
+          </button>
+          @if (hasCountdown()) {
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="removeCountdown()">
+              Geri sayımı kaldır
+            </button>
+          }
+        </div>
+      </form>
+    }
+  </div>
+</section>

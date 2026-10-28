@@ -1,0 +1,87 @@
+<a class="back-link small" routerLink="/forms">Etkinlik formları</a>
+
+@let currentForm = form();
+@let list = applications();
+@let teamList = teams();
+@let count = (list ?? teamList)?.length ?? 0;
+
+<div class="page-header">
+  <div>
+    <h1>{{ currentForm?.title ?? 'Başvurular' }}</h1>
+    <p class="muted">{{ currentForm?.type === 'hackathon' ? 'Takım başvuruları' : 'Başvurular' }}</p>
+  </div>
+  @if (count > 0) {
+    <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
+      {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
+    </button>
+  }
+</div>
+
+@if (teamList) {
+  @if (teamList.length === 0) {
+    <div class="card empty">Bu forma henüz takım başvurusu yapılmadı.</div>
+  } @else {
+    <p class="muted small list-count">{{ teamList.length }} takım</p>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Takım</th>
+            <th>Üyeler</th>
+            <th>Başvuru tarihi</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (team of teamList; track team.id) {
+            <tr>
+              <td><strong>{{ team.teamName }}</strong></td>
+              <td>
+                <ul class="member-list">
+                  @for (member of [team.member1, team.member2, team.member3]; track $index) {
+                    @if (member) {
+                      <li>
+                        <strong>{{ member.name }}</strong>
+                        <span class="muted small">{{ member.phone | phone }} · {{ member.email }}</span>
+                      </li>
+                    }
+                  }
+                </ul>
+              </td>
+              <td class="nowrap">{{ team.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+} @else if (list) {
+  @if (list.length === 0) {
+    <div class="card empty">Bu forma henüz başvuru yapılmadı.</div>
+  } @else {
+    <p class="muted small list-count">{{ list.length }} başvuru</p>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ad soyad</th>
+            <th>Telefon</th>
+            <th>E-posta</th>
+            <th>Başvuru tarihi</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (application of list; track application.id) {
+            <tr>
+              <td>{{ application.firstName }} {{ application.lastName }}</td>
+              <td class="nowrap">{{ application.phoneNumber | phone }}</td>
+              <td>{{ application.email }}</td>
+              <td class="nowrap">{{ application.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+} @else {
+  <p class="muted">Yükleniyor...</p>
+}

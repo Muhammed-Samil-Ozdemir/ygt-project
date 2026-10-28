@@ -1,0 +1,61 @@
+<div class="container page">
+  <div class="card form-card">
+    @if (sent()) {
+      <div class="stack result">
+        <h1>Başvurunuz alındı</h1>
+        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
+        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else if (closedMessage(); as message) {
+      <div class="stack result">
+        <h1>Etkinlik başvurusu</h1>
+        <p class="muted">{{ message }}</p>
+        <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else if (form(); as form) {
+      <div class="stack">
+        <h1>{{ form.title }}</h1>
+        @if (form.content) {
+          <p class="muted pre-line">{{ form.content }}</p>
+        }
+      </div>
+
+      <form class="stack" (ngSubmit)="submit()" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">Ad</label>
+            <input id="firstName" class="input" name="firstName" autocomplete="given-name" [(ngModel)]="model.firstName" />
+          </div>
+          <div class="field">
+            <label for="lastName">Soyad</label>
+            <input id="lastName" class="input" name="lastName" autocomplete="family-name" [(ngModel)]="model.lastName" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="phoneNumber">Telefon</label>
+          <input
+            id="phoneNumber"
+            class="input"
+            type="tel"
+            name="phoneNumber"
+            autocomplete="tel"
+            placeholder="0555 123 45 67"
+            [(ngModel)]="model.phoneNumber"
+          />
+        </div>
+
+        <div class="field">
+          <label for="email">E-posta <span class="optional">(isteğe bağlı)</span></label>
+          <input id="email" class="input" type="email" name="email" autocomplete="email" [(ngModel)]="model.email" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+          {{ sending() ? 'Gönderiliyor...' : 'Başvur' }}
+        </button>
+      </form>
+    } @else {
+      <p class="muted">Yükleniyor...</p>
+    }
+  </div>
+</div>

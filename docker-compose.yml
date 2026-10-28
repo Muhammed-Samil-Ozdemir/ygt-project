@@ -1,5 +1,5 @@
 # YGT: veritabanı, API ve ön yüz tek komutla ayağa kalkar.
-# Şimdilik veritabanı ve API var; ön yüz (nginx) sonraki aşamada eklenecek.
+# Site http://localhost, yönetim paneli http://localhost/admin/ adresinde açılır (WEB_PORT ile değişir).
 # Kullanım: .env.example dosyasını .env olarak kopyalayın, sonra: docker compose up -d --build
 name: ygt
 
@@ -35,9 +35,16 @@ services:
     depends_on:
       mssql:
         condition: service_healthy
-    # Geçici: ön yüz eklenince API dışarı açılmayacak, nginx üzerinden /api altında erişilecek.
+    # API dışarı açılmaz; istekler web (nginx) üzerinden /api altında gelir.
+    # Gerçek istemci IP'si nginx'in eklediği X-Forwarded-For başlığından okunduğu için bu önemli.
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    depends_on:
+      - api
     ports:
-      - "${API_PORT:-5080}:8080"
+      - "${WEB_PORT:-80}:80"
     restart: unless-stopped
 
 volumes:

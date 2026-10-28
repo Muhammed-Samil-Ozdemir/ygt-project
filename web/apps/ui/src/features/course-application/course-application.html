@@ -1,0 +1,73 @@
+<div class="container page">
+  <div class="card form-card">
+    @let courseList = courses();
+
+    @if (sent()) {
+      <div class="stack result">
+        <h1>Başvurunuz alındı</h1>
+        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
+        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else if (courseList === null) {
+      <p class="muted">Yükleniyor...</p>
+    } @else if (courseList.length === 0) {
+      <div class="stack result">
+        <h1>Eğitim başvurusu</h1>
+        <p class="muted">
+          Şu anda başvuruya açık bir eğitim bulunmuyor. Yeni eğitimleri sosyal medya hesaplarımızdan duyuruyoruz.
+        </p>
+        <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else {
+      <h1>Eğitim başvurusu</h1>
+
+      <form class="stack" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label for="course">Eğitim</label>
+          <select id="course" class="select" name="courseId" [(ngModel)]="courseId">
+            <option value="" disabled>Eğitim seçin</option>
+            @for (course of courseList; track course.id) {
+              <option [value]="course.id">{{ course.title }}</option>
+            }
+          </select>
+          @if (contentOf(courseId); as content) {
+            <p class="hint pre-line">{{ content }}</p>
+          }
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">Ad</label>
+            <input id="firstName" class="input" name="firstName" autocomplete="given-name" [(ngModel)]="model.firstName" />
+          </div>
+          <div class="field">
+            <label for="lastName">Soyad</label>
+            <input id="lastName" class="input" name="lastName" autocomplete="family-name" [(ngModel)]="model.lastName" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">E-posta</label>
+          <input id="email" class="input" type="email" name="email" autocomplete="email" [(ngModel)]="model.email" />
+        </div>
+
+        <div class="field">
+          <label for="phoneNumber">Telefon <span class="optional">(isteğe bağlı)</span></label>
+          <input
+            id="phoneNumber"
+            class="input"
+            type="tel"
+            name="phoneNumber"
+            autocomplete="tel"
+            placeholder="0555 123 45 67"
+            [(ngModel)]="model.phoneNumber"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+          {{ sending() ? 'Gönderiliyor...' : 'Başvur' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<div class="page-header">
+  <div>
+    <h1>Etkinlik formları</h1>
+    <p class="muted">Aynı anda tek form başvurulara açık olabilir.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="new">Yeni form</a>
+</div>
+
+@let formList = forms();
+@if (formList === null) {
+  <p class="muted">Yükleniyor...</p>
+} @else if (formList.length === 0) {
+  <div class="card empty">Henüz form yok.</div>
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Form</th>
+          <th>Tür</th>
+          <th>Durum</th>
+          <th>Başvuru</th>
+          <th>Oluşturulma</th>
+          <th><span class="visually-hidden">İşlemler</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (form of formList; track form.id) {
+          <tr>
+            <td>
+              <strong>{{ form.title }}</strong>
+              @if (form.content) {
+                <div class="muted small clamp">{{ form.content }}</div>
+              }
+            </td>
+            <td class="nowrap">{{ form.type === 'hackathon' ? 'Takım (hackathon)' : 'Bireysel' }}</td>
+            <td>
+              @if (form.isActive) {
+                <span class="badge badge-success">Başvuruya açık</span>
+              } @else {
+                <span class="badge">Kapalı</span>
+              }
+            </td>
+            <td>{{ form.applicationCount }}</td>
+            <td class="nowrap">{{ form.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              <div class="actions">
+                <a class="btn btn-outline btn-sm" [routerLink]="[form.id, 'applications']">Başvurular</a>
+                <a class="btn btn-ghost btn-sm" [routerLink]="[form.id, 'edit']">Düzenle</a>
+                @if (form.isActive) {
+                  <button type="button" class="btn btn-danger btn-sm" (click)="close(form)">Kapat</button>
+                } @else {
+                  <button type="button" class="btn btn-outline btn-sm" (click)="reopen(form)">Aç</button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

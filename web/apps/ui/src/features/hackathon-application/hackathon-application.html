@@ -1,0 +1,92 @@
+<div class="container page">
+  <div class="card form-card form-card-wide">
+    @if (sent()) {
+      <div class="stack result">
+        <h1>Başvurunuz alındı</h1>
+        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
+        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else if (closedMessage(); as message) {
+      <div class="stack result">
+        <h1>Hackathon başvurusu</h1>
+        <p class="muted">{{ message }}</p>
+        <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
+      </div>
+    } @else if (form(); as form) {
+      <div class="stack">
+        <h1>{{ form.title }}</h1>
+        @if (form.content) {
+          <p class="muted pre-line">{{ form.content }}</p>
+        }
+        <p class="notice small">Takımlar 2 ya da 3 kişiden oluşur. Üyelerin e-posta adresleri .edu uzantılı okul e-postası olmalıdır.</p>
+      </div>
+
+      <form class="stack" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label for="teamName">Takım adı</label>
+          <input id="teamName" class="input" name="teamName" [(ngModel)]="model.teamName" />
+        </div>
+
+        @for (member of members; track member.key) {
+          @let fields = model[member.key];
+          <fieldset class="member-fieldset">
+            <legend>
+              {{ member.title }}
+              @if (member.optional) {
+                <span class="optional">(isteğe bağlı)</span>
+              }
+            </legend>
+
+            <div class="stack">
+              <div class="field-row">
+                <div class="field">
+                  <label [for]="member.key + '-name'">Ad soyad</label>
+                  <input [id]="member.key + '-name'" class="input" [name]="member.key + '-name'" [(ngModel)]="fields.name" />
+                </div>
+                <div class="field">
+                  <label [for]="member.key + '-phone'">Telefon</label>
+                  <input
+                    [id]="member.key + '-phone'"
+                    class="input"
+                    type="tel"
+                    [name]="member.key + '-phone'"
+                    placeholder="0555 123 45 67"
+                    [(ngModel)]="fields.phone"
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label [for]="member.key + '-email'">Okul e-postası</label>
+                <input
+                  [id]="member.key + '-email'"
+                  class="input"
+                  type="email"
+                  [name]="member.key + '-email'"
+                  placeholder="ad.soyad@ogr.ktun.edu.tr"
+                  [(ngModel)]="fields.email"
+                />
+              </div>
+            </div>
+          </fieldset>
+        }
+
+        <div class="stack kvkk">
+          <details>
+            <summary>Aydınlatma metnini oku</summary>
+            <p class="kvkk-text small pre-line">{{ kvkkText }}</p>
+          </details>
+          <label class="checkbox">
+            <input type="checkbox" name="kvkkApproved" [(ngModel)]="kvkkApproved" />
+            <span>Aydınlatma metnini okudum, kişisel verilerimin işlenmesini onaylıyorum.</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+          {{ sending() ? 'Gönderiliyor...' : 'Takımı kaydet' }}
+        </button>
+      </form>
+    } @else {
+      <p class="muted">Yükleniyor...</p>
+    }
+  </div>
+</div>

@@ -1,0 +1,74 @@
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <p class="eyebrow">Konya Teknik Üniversitesi</p>
+      <h1 class="hero-title"><span class="brand-accent">Yazılım</span> Geliştirme Topluluğu</h1>
+      <p class="hero-lead">
+        Web, mobil ve oyun geliştirmeye ilgi duyan öğrencilerin birlikte öğrendiği, proje ürettiği ve etkinlikler
+        düzenlediği topluluk.
+      </p>
+      <div class="row">
+        <a class="btn btn-primary" [href]="links.join" target="_blank" rel="noopener">Bize Katılın</a>
+        <a class="btn btn-outline" routerLink="/" fragment="about">Bizi tanıyın</a>
+      </div>
+    </div>
+    <img class="hero-logo" src="images/logo.png" alt="Yazılım Geliştirme Topluluğu logosu" width="220" height="231" />
+  </div>
+</section>
+
+@if (countdown(); as countdown) {
+  <section class="container">
+    <a class="countdown-banner" routerLink="/counter">
+      <span class="countdown-banner-title">{{ countdown.title }}</span>
+      <span class="countdown-banner-time">
+        {{ countdown.left.days }} gün {{ countdown.left.hours }} saat {{ countdown.left.minutes }} dakika
+        {{ countdown.left.seconds }} saniye
+      </span>
+    </a>
+  </section>
+}
+
+<section id="about" class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">Hakkımızda</h2>
+    <div class="about-grid">
+      @for (item of about; track item.title) {
+        <article class="card">
+          <h3>{{ item.title }}</h3>
+          <p class="muted">{{ item.text }}</p>
+        </article>
+      }
+      <article class="card join-card">
+        <h3>Bize katıl!</h3>
+        <p class="muted">{{ joinText }}</p>
+        <a class="btn btn-primary" [href]="links.join" target="_blank" rel="noopener">Bize Katılın</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="team" class="section">
+  <div class="container">
+    <h2 class="section-title">Ekibimiz</h2>
+    <ul class="team-grid">
+      @for (member of team; track member.name) {
+        <li class="member">
+          <img [src]="'images/team/' + member.photo" [alt]="member.name" width="160" height="160" loading="lazy" />
+          <strong>{{ member.name }}</strong>
+          <span class="muted small">{{ member.role }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">Çalıştığımız teknolojiler</h2>
+    <ul class="chips">
+      @for (technology of technologies; track technology) {
+        <li class="chip">{{ technology }}</li>
+      }
+    </ul>
+  </div>
+</section>

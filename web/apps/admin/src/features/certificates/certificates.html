@@ -1,0 +1,68 @@
+<div class="page-header">
+  <div>
+    <h1>Sertifikalar</h1>
+    <p class="muted">Her sertifikanın bir doğrulama linki var; linki sertifikanın üzerine yazabilir ya da QR koda çevirebilirsiniz.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="new">Yeni sertifika</a>
+</div>
+
+@let list = certificates();
+@if (list === null) {
+  <p class="muted">Yükleniyor...</p>
+} @else if (list.length === 0) {
+  <div class="card empty">Henüz sertifika yok.</div>
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ad soyad</th>
+          <th>Eğitim</th>
+          <th>Görsel</th>
+          <th>Oluşturulma</th>
+          <th><span class="visually-hidden">İşlemler</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (certificate of list; track certificate.id) {
+          <tr>
+            <td><strong>{{ certificate.firstName }} {{ certificate.lastName }}</strong></td>
+            <td>{{ certificate.courseName }}</td>
+            <td>
+              @if (certificate.hasImage) {
+                <span class="badge badge-success">Var</span>
+              } @else {
+                <span class="badge">Yok</span>
+              }
+            </td>
+            <td class="nowrap">{{ certificate.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              <div class="actions">
+                <button type="button" class="btn btn-outline btn-sm" (click)="copyLink(certificate)">Linki kopyala</button>
+                <a class="btn btn-ghost btn-sm" [href]="verifyUrl(certificate)" target="_blank" rel="noopener">Görüntüle</a>
+                <input
+                  #fileInput
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  hidden
+                  (change)="upload(certificate, $event)"
+                />
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm"
+                  [disabled]="uploadingId() === certificate.id"
+                  (click)="fileInput.click()"
+                >
+                  {{ uploadingId() === certificate.id ? 'Yükleniyor...' : certificate.hasImage ? 'Görseli değiştir' : 'Görsel yükle' }}
+                </button>
+                <a class="btn btn-ghost btn-sm" [routerLink]="[certificate.id, 'edit']">Düzenle</a>
+                <button type="button" class="btn btn-danger btn-sm" (click)="remove(certificate)">Sil</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="muted small list-note">Görsel PNG, JPG ya da WEBP olabilir, en fazla 5 MB.</p>
+}
