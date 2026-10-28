@@ -17,4 +17,7 @@ public sealed class Certificate : BaseEntity
     public string LastName { get; set; } = default!;
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
+
+    /// <summary>Yüklenen sertifika görselinin dosya adı. Görsel yoksa boş.</summary>
+    public string? ImageFileName { get; set; }
 }

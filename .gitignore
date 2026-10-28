@@ -486,3 +486,6 @@ $RECYCLE.BIN/
 .nx/
 dist/
 coverage/
+
+# Yüklenen dosyalar (sertifika görselleri)
+storage/

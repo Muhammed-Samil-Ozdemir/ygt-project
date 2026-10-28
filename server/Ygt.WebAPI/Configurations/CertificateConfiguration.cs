@@ -34,6 +34,9 @@ public sealed class CertificateConfiguration : IEntityTypeConfiguration<Certific
         builder.Property(x => x.PhoneNumber)
             .HasMaxLength(32);
 
+        builder.Property(x => x.ImageFileName)
+            .HasMaxLength(100);
+
         builder.HasIndex(x => x.Code)
             .IsUnique();
     }

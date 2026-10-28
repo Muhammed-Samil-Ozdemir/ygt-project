@@ -50,6 +50,10 @@ namespace Ygt.WebAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("ImageFileName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
