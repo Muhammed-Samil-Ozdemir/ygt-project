@@ -33,6 +33,18 @@ public class AboutCardController(AboutCardService service) : ControllerBase
         return Ok();
     }
 
+    /// <summary>Görsel multipart/form-data ile "file" alanında gönderilir. Kartın güncel hâli döner.</summary>
+    [HttpPut("{id:guid}/image")]
+    public async Task<IActionResult> UploadImage(Guid id, IFormFile? file, CancellationToken cancellationToken) =>
+        Ok(await service.UploadImageAsync(id, file, cancellationToken));
+
+    [HttpDelete("{id:guid}/image")]
+    public async Task<IActionResult> DeleteImage(Guid id, CancellationToken cancellationToken)
+    {
+        await service.DeleteImageAsync(id, cancellationToken);
+        return Ok();
+    }
+
     [HttpPut("order")]
     public async Task<IActionResult> Reorder(OrderCommandDto request, CancellationToken cancellationToken)
     {

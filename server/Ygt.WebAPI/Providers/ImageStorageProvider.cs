@@ -6,13 +6,16 @@ using Ygt.WebAPI.Utilities;
 namespace Ygt.WebAPI.Providers;
 
 /// <summary>
-/// Yüklenen görselleri (sertifika görselleri, ekip fotoğrafları) storage klasörünün alt klasörlerinde saklar.
+/// Yüklenen görselleri storage klasörünün alt klasörlerinde saklar: sertifika görselleri ve sitenin görselleri
+/// (logo, sekme simgesi, giriş görseli, ekip fotoğrafları, kart görselleri).
 /// Docker'da storage klasörü bir volume'dür. Veritabanında sadece dosya adı tutulur.
 /// </summary>
 public sealed class ImageStorageProvider(IOptions<StorageOptions> storageOptions, IWebHostEnvironment environment)
 {
     public const string Certificates = "certificates";
-    public const string Team = "team";
+
+    /// <summary>Sitenin görselleri. Hepsi herkese açıktır; GET /site/content/images/{dosya} ile verilir.</summary>
+    public const string Site = "site";
 
     private const long MaxImageSize = 5 * 1024 * 1024;
 
@@ -49,14 +52,12 @@ public sealed class ImageStorageProvider(IOptions<StorageOptions> storageOptions
         return fileName;
     }
 
-    /// <summary>Diskteki bir görseli klasöre kopyalar (başlangıç verisi için). Kaydedilen dosya adını döndürür.</summary>
-    public string Copy(string folder, string name, string sourcePath)
-    {
-        var fileName = $"{name}{Path.GetExtension(sourcePath).ToLowerInvariant()}";
-        Directory.CreateDirectory(DirectoryOf(folder));
-        File.Copy(sourcePath, PathOf(folder, fileName), overwrite: true);
-        return fileName;
-    }
+    /// <summary>
+    /// Görseli yeni ve tekil bir adla kaydeder. Görsel değiştiğinde adı da değiştiği için tarayıcı önbelleğindeki
+    /// eski görsel yerine yenisi görünür. Kaydedilen dosya adını döndürür.
+    /// </summary>
+    public Task<string> SaveNewAsync(string folder, IFormFile? file, CancellationToken cancellationToken) =>
+        SaveAsync(folder, Guid.NewGuid().ToString(), file, cancellationToken);
 
     public async Task<FileDto> ReadAsync(string folder, string? fileName, string notFoundMessage, CancellationToken cancellationToken)
     {
@@ -68,9 +69,10 @@ public sealed class ImageStorageProvider(IOptions<StorageOptions> storageOptions
         return new FileDto(content, contentType, fileName!);
     }
 
+    /// <summary>Dosyayı siler. Ad boşsa (görsel hiç yüklenmemişse) bir şey yapmaz.</summary>
     public void Delete(string folder, string? fileName)
     {
-        if (fileName is null)
+        if (string.IsNullOrEmpty(fileName))
             return;
 
         var path = PathOf(folder, fileName);

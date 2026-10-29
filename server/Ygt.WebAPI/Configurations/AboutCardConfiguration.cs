@@ -19,5 +19,8 @@ public sealed class AboutCardConfiguration : IEntityTypeConfiguration<AboutCard>
         builder.Property(x => x.Text)
             .IsRequired()
             .HasMaxLength(1000);
+
+        builder.Property(x => x.ImageFileName)
+            .HasMaxLength(100);
     }
 }

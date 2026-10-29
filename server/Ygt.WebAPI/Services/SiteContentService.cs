@@ -8,17 +8,20 @@ using Ygt.WebAPI.Utilities;
 
 namespace Ygt.WebAPI.Services;
 
-/// <summary>Sitenin içeriği: siteye giden tek parça yanıt, ekip fotoğrafları ve paneldeki metinler.</summary>
+/// <summary>Sitenin içeriği: siteye giden tek parça yanıt, sitenin görselleri ve paneldeki metinler.</summary>
 public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvider imageStorage)
 {
     public async Task<SiteContentDto> GetAsync(CancellationToken cancellationToken)
     {
-        var texts = await ReadTextsAsync(cancellationToken);
+        var stored = await ReadTextsAsync(cancellationToken);
+        var texts = SiteTextCatalog.All.ToDictionary(
+            d => d.Key,
+            d => stored.GetValueOrDefault(d.Key) is { Length: > 0 } value ? value : d.Placeholder ?? "");
 
         var about = await dbContext.AboutCards
             .Where(c => c.IsVisible)
             .OrderBy(c => c.SortOrder)
-            .Select(c => new AboutCardDto(c.Title, c.Text))
+            .Select(c => new AboutCardDto(c.Title, c.Text, c.ImageFileName))
             .ToListAsync(cancellationToken);
 
         var team = await dbContext.TeamMembers
@@ -41,34 +44,23 @@ public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvi
         return new SiteContentDto(texts, about, team, technologies, links);
     }
 
-    /// <summary>Sadece bir ekip üyesine ait fotoğraf verilir; storage'daki başka dosyalara bu yoldan ulaşılamaz.</summary>
-    public async Task<FileDto> GetPhotoAsync(string fileName, CancellationToken cancellationToken)
-    {
-        const string notFound = "Fotoğraf bulunamadı.";
-
-        if (!await dbContext.TeamMembers.AnyAsync(m => m.PhotoFileName == fileName, cancellationToken))
-            throw Errors.NotFound(notFound);
-
-        return await imageStorage.ReadAsync(ImageStorageProvider.Team, fileName, notFound, cancellationToken);
-    }
+    /// <summary>Sitenin görseli. Klasörde sadece panelden yüklenen, sitede herkese görünen görseller durur.</summary>
+    public Task<FileDto> GetImageAsync(string fileName, CancellationToken cancellationToken) =>
+        imageStorage.ReadAsync(ImageStorageProvider.Site, fileName, "Görsel bulunamadı.", cancellationToken);
 
     public async Task<List<SiteTextDto>> GetTextsAsync(CancellationToken cancellationToken)
     {
         var values = await ReadTextsAsync(cancellationToken);
-
-        return SiteTextCatalog.All
-            .Select(d => new SiteTextDto(d.Key, d.Group, d.Label, d.Hint, d.Kind, d.MaxLength, d.IsRequired, values[d.Key]))
-            .ToList();
+        return SiteTextCatalog.All.Select(d => ToDto(d, values.GetValueOrDefault(d.Key, ""))).ToList();
     }
 
+    /// <summary>Metinleri kaydeder. Görseller bu yoldan değil, UploadImageAsync ile değişir.</summary>
     public async Task UpdateTextsAsync(SiteTextsCommandDto request, CancellationToken cancellationToken)
     {
         if (request.Values is null || request.Values.Count == 0)
             throw Errors.BadRequest("Değiştirilecek metin gönderilmedi.");
 
-        var values = request.Values.ToDictionary(
-            pair => pair.Key,
-            pair => Clean(SiteTextCatalog.Find(pair.Key) ?? throw Errors.BadRequest($"Bilinmeyen metin: {pair.Key}"), pair.Value));
+        var values = request.Values.ToDictionary(pair => pair.Key, pair => Clean(FindText(pair.Key), pair.Value));
 
         var keys = values.Keys.ToList();
         var rows = await dbContext.SiteTexts
@@ -86,7 +78,42 @@ public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvi
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <summary>Metni tanımındaki kurallara göre doğrular. Boş bırakılan isteğe bağlı metin "" olarak saklanır.</summary>
+    /// <summary>Görseli yükler, öncekini siler. Alanın güncel hâlini döndürür.</summary>
+    public async Task<SiteTextDto> UploadImageAsync(string key, IFormFile? file, CancellationToken cancellationToken)
+    {
+        var definition = FindImage(key);
+
+        var row = await dbContext.SiteTexts.FirstOrDefaultAsync(t => t.Key == key, cancellationToken);
+        if (row is null)
+        {
+            row = new SiteText { Key = key };
+            dbContext.SiteTexts.Add(row);
+        }
+
+        var oldFileName = row.Value;
+        row.Value = await imageStorage.SaveNewAsync(ImageStorageProvider.Site, file, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        imageStorage.Delete(ImageStorageProvider.Site, oldFileName);
+
+        return ToDto(definition, row.Value);
+    }
+
+    public async Task DeleteImageAsync(string key, CancellationToken cancellationToken)
+    {
+        FindImage(key);
+        var row = await dbContext.SiteTexts.FirstOrDefaultAsync(t => t.Key == key, cancellationToken);
+        if (row is null || row.Value.Length == 0)
+            return;
+
+        var oldFileName = row.Value;
+        row.Value = "";
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        imageStorage.Delete(ImageStorageProvider.Site, oldFileName);
+    }
+
+    /// <summary>Metni tanımındaki kurallara göre doğrular. Boş bırakılan metin "" olarak saklanır.</summary>
     private static string Clean(SiteTextDefinition definition, string? value)
     {
         var label = $"{definition.Label} ({definition.Group})";
@@ -95,18 +122,30 @@ public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvi
             ? Input.OptionalUrl(value, label)
             : Input.OptionalText(value, label, definition.MaxLength);
 
-        if (text is null && definition.IsRequired)
-            throw Errors.BadRequest($"{label} zorunludur.");
-
         return text ?? "";
     }
 
-    /// <summary>Katalogdaki her anahtarın kayıtlı değeri; kayıt yoksa varsayılan değeri.</summary>
-    private async Task<Dictionary<string, string>> ReadTextsAsync(CancellationToken cancellationToken)
+    private static SiteTextDefinition FindText(string key)
     {
-        var stored = await dbContext.SiteTexts.AsNoTracking()
-            .ToDictionaryAsync(t => t.Key, t => t.Value, cancellationToken);
+        var definition = SiteTextCatalog.Find(key) ?? throw Errors.BadRequest($"Bilinmeyen alan: {key}");
+        if (definition.Kind == SiteTextKind.Image)
+            throw Errors.BadRequest($"{definition.Label} bir görseldir; metin olarak değiştirilemez.");
 
-        return SiteTextCatalog.All.ToDictionary(d => d.Key, d => stored.GetValueOrDefault(d.Key, d.DefaultValue));
+        return definition;
     }
+
+    private static SiteTextDefinition FindImage(string key)
+    {
+        var definition = SiteTextCatalog.Find(key) ?? throw Errors.NotFound($"Bilinmeyen alan: {key}");
+        if (definition.Kind != SiteTextKind.Image)
+            throw Errors.BadRequest($"{definition.Label} bir görsel alanı değildir.");
+
+        return definition;
+    }
+
+    private static SiteTextDto ToDto(SiteTextDefinition d, string value) =>
+        new(d.Key, d.Group, d.Label, d.Hint, d.Kind, d.MaxLength, d.Placeholder, value);
+
+    private async Task<Dictionary<string, string>> ReadTextsAsync(CancellationToken cancellationToken) =>
+        await dbContext.SiteTexts.AsNoTracking().ToDictionaryAsync(t => t.Key, t => t.Value, cancellationToken);
 }

@@ -8,6 +8,9 @@ public sealed class AboutCard : BaseEntity, ISortable
     public string Title { get; set; } = default!;
     public string Text { get; set; } = default!;
 
+    /// <summary>Kartın üstündeki isteğe bağlı görsel; storage'daki dosya adı.</summary>
+    public string? ImageFileName { get; set; }
+
     public int SortOrder { get; set; }
 
     /// <summary>Gizlenen kart sitede görünmez, panelde kalır.</summary>

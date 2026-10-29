@@ -2,14 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Ygt.WebAPI.Models;
 using Ygt.WebAPI.Options;
-using Ygt.WebAPI.Providers;
-using Ygt.WebAPI.Utilities;
 
 namespace Ygt.WebAPI.Context;
 
 /// <summary>
-/// Uygulama açılırken veritabanını hazırlar: bekleyen migration'ları uygular ve başlangıç verilerini ekler.
-/// Her açılışta çalışır; var olan veriye dokunmaz.
+/// Uygulama açılırken veritabanını hazırlar: bekleyen migration'ları uygular ve sistemin ihtiyaç duyduğu kayıtları
+/// (admin, site ayarları, ziyaret sayacı) ekler. Site içeriği eklenmez; panelden girilir. Her açılışta çalışır.
 /// </summary>
 public static class DbInitializer
 {
@@ -30,9 +28,6 @@ public static class DbInitializer
         var adminOptions = services.GetRequiredService<IOptions<AdminSeedOptions>>().Value;
         await SeedAdminAsync(dbContext, adminOptions, logger, cancellationToken);
         await SeedSiteAsync(dbContext, logger, cancellationToken);
-
-        var imageStorage = services.GetRequiredService<ImageStorageProvider>();
-        await SeedContentAsync(dbContext, imageStorage, logger, cancellationToken);
     }
 
     /// <summary>
@@ -96,63 +91,5 @@ public static class DbInitializer
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Site içeriğini hazırlar. Eksik metin anahtarları varsayılan değerleriyle eklenir; böylece SiteTextCatalog'a
-    /// sonradan eklenen metinler de veritabanına yazılır. Listeler (hakkımızda, ekip, teknolojiler, bağlantılar)
-    /// sadece ilk kurulumda doldurulur, panelden silinen kayıtlar geri gelmez.
-    /// </summary>
-    private static async Task SeedContentAsync(
-        AppDbContext dbContext,
-        ImageStorageProvider imageStorage,
-        ILogger logger,
-        CancellationToken cancellationToken)
-    {
-        var existingKeys = await dbContext.SiteTexts.Select(t => t.Key).ToListAsync(cancellationToken);
-        var isFirstRun = existingKeys.Count == 0;
-
-        foreach (var definition in SiteTextCatalog.All.Where(d => !existingKeys.Contains(d.Key)))
-        {
-            dbContext.SiteTexts.Add(new SiteText { Key = definition.Key, Value = definition.DefaultValue });
-        }
-
-        if (isFirstRun)
-        {
-            dbContext.AboutCards.AddRange(SiteContentSeed.About.Select((card, index) =>
-                new AboutCard { Title = card.Title, Text = card.Text, SortOrder = index }));
-
-            dbContext.TeamMembers.AddRange(SiteContentSeed.Team.Select((member, index) =>
-                new TeamMember
-                {
-                    Name = member.Name,
-                    Role = member.Role,
-                    PhotoFileName = CopySeedPhoto(imageStorage, member.Photo, logger),
-                    SortOrder = index
-                }));
-
-            dbContext.Technologies.AddRange(SiteContentSeed.Technologies.Select((name, index) =>
-                new Technology { Name = name, SortOrder = index }));
-
-            dbContext.SiteLinks.AddRange(SiteContentSeed.Links.Select((link, index) =>
-                new SiteLink { Label = link.Label, Url = link.Url, SortOrder = index }));
-
-            logger.LogInformation("Site içeriği başlangıç verisiyle dolduruldu.");
-        }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>Başlangıç fotoğrafını storage'a yeni bir adla kopyalar. Dosya yoksa kişi fotoğrafsız eklenir.</summary>
-    private static string? CopySeedPhoto(ImageStorageProvider imageStorage, string photo, ILogger logger)
-    {
-        var source = Path.Combine(AppContext.BaseDirectory, "SeedData", "team", photo);
-        if (!File.Exists(source))
-        {
-            logger.LogWarning("Başlangıç fotoğrafı bulunamadı: {Path}", source);
-            return null;
-        }
-
-        return imageStorage.Copy(ImageStorageProvider.Team, Guid.NewGuid().ToString(), source);
     }
 }

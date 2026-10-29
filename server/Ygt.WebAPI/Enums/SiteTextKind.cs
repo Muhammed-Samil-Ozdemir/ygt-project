@@ -10,5 +10,8 @@ public enum SiteTextKind
     LongText,
 
     /// <summary>http(s) ya da mailto bağlantısı.</summary>
-    Url
+    Url,
+
+    /// <summary>Görsel (logo, sekme simgesi...). Değeri yüklenen dosyanın adıdır; metin olarak değiştirilemez, ayrıca yüklenir.</summary>
+    Image
 }

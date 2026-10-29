@@ -1,7 +1,7 @@
 namespace Ygt.WebAPI.Options;
 
 /// <summary>
-/// Yüklenen dosyaların (sertifika görselleri, ekip fotoğrafları) saklandığı klasör.
+/// Yüklenen dosyaların (sertifika görselleri, sitenin görselleri) saklandığı klasör.
 /// Göreli yol uygulama klasörüne göre çözülür. Docker'da bu klasör bir volume'dür.
 /// </summary>
 public sealed class StorageOptions

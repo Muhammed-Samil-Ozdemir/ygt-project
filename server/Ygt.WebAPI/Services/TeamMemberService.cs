@@ -41,23 +41,19 @@ public sealed class TeamMemberService(AppDbContext dbContext, ImageStorageProvid
         dbContext.TeamMembers.Remove(member);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        imageStorage.Delete(ImageStorageProvider.Team, member.PhotoFileName);
+        imageStorage.Delete(ImageStorageProvider.Site, member.PhotoFileName);
     }
 
-    /// <summary>
-    /// Fotoğrafı yükler, öncekini siler. Her yüklemede yeni dosya adı verilir; böylece tarayıcı
-    /// önbelleğindeki eski fotoğraf yerine yenisi görünür. Kişinin güncel hâlini döndürür.
-    /// </summary>
+    /// <summary>Fotoğrafı yükler, öncekini siler. Kişinin güncel hâlini döndürür.</summary>
     public async Task<TeamMemberListItemDto> UploadPhotoAsync(Guid id, IFormFile? file, CancellationToken cancellationToken)
     {
         var member = await FindAsync(id, cancellationToken);
         var oldFileName = member.PhotoFileName;
 
-        member.PhotoFileName = await imageStorage.SaveAsync(
-            ImageStorageProvider.Team, Guid.NewGuid().ToString(), file, cancellationToken);
+        member.PhotoFileName = await imageStorage.SaveNewAsync(ImageStorageProvider.Site, file, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        imageStorage.Delete(ImageStorageProvider.Team, oldFileName);
+        imageStorage.Delete(ImageStorageProvider.Site, oldFileName);
 
         return ToListItem(member);
     }
@@ -70,7 +66,7 @@ public sealed class TeamMemberService(AppDbContext dbContext, ImageStorageProvid
         member.PhotoFileName = null;
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        imageStorage.Delete(ImageStorageProvider.Team, oldFileName);
+        imageStorage.Delete(ImageStorageProvider.Site, oldFileName);
     }
 
     public async Task ReorderAsync(OrderCommandDto request, CancellationToken cancellationToken)
