@@ -51,11 +51,11 @@ npx nx serve admin            # http://localhost:4201/admin/
 
 Geliştirme sunucusu `/api` isteklerini `proxy.conf.json` ile `localhost:5146`'ya yönlendirir; Docker'daki nginx de aynı yolu kullanır.
 
-API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları, ana sayfa ziyaret sayacı ve site içeriği.
+API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları ve ana sayfa ziyaret sayacı.
 Ayardaki admin şifresi değişirse bir sonraki açılışta veritabanındaki şifre de güncellenir.
 
-Site içeriği (metinler, hakkımızda kartları, ekip, teknolojiler, bağlantılar) ilk kurulumda eski sitedeki içerikle doldurulur; ekip fotoğrafları `server/Ygt.WebAPI/SeedData/team` klasöründen storage'a kopyalanır.
-Listeler sadece ilk kurulumda doldurulur, panelden silinen kayıtlar geri gelmez. `SiteTextCatalog`'a sonradan eklenen metinler ise bir sonraki açılışta varsayılan değeriyle eklenir.
+Site içeriği boş başlar: logo, sekme simgesi, bütün metinler, hakkımızda kartları, ekip, teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden girilir.
+Boş bırakılan yazı ve görsel sitede gösterilmez. Bölüm başlıkları gibi bazı alanlarda boşken genel bir ifade ("Hakkımızda") yazılır; bunlar `Utilities/SiteTextCatalog.cs`'te `Placeholder` olarak tanımlı.
 
 ## API
 
@@ -68,8 +68,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 |---|---|---|
 | POST | `/auth/login` | `{ email, password }` → `{ token, expiresAt }` |
 | GET | `/site/settings` | Ana sayfa butonu (`course` / `form`) ve geri sayım |
-| GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin), `about`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla |
-| GET | `/site/content/photos/{dosya}` | Ekip fotoğrafı. Dosya adı her yüklemede değiştiği için uzun süre önbelleğe alınabilir |
+| GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin; görsellerde dosya adı), `about`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla |
+| GET | `/site/content/images/{dosya}` | Panelden yüklenen görsel (logo, ekip fotoğrafı, kart görseli...). Dosya adı her yüklemede değiştiği için uzun süre önbelleğe alınabilir |
 | POST | `/site/visits/{page}` | Ziyaret sayacını artırır (şimdilik sadece `home`) |
 | GET | `/courses/active` | Aktif eğitimler |
 | POST | `/courses/{id}/applications` | Eğitim başvurusu |
@@ -101,11 +101,12 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | GET, POST | `/certificates` | Tüm sertifikalar, yeni sertifika (doğrulama kodu otomatik) |
 | PUT, DELETE | `/certificates/{id}` | Düzenle, sil |
 | PUT | `/certificates/{id}/image` | Görsel yükle (`multipart/form-data`, alan adı `file`, PNG/JPG/WEBP, en fazla 5 MB) |
-| GET, PUT | `/site/content/texts` | Tek parça metinler: tanımları (etiket, tür, sınır) ve değerleri / `{ values: { anahtar: metin } }` ile değiştirme |
+| GET, PUT | `/site/content/texts` | Tek parça metinler ve görseller: tanımları (etiket, tür, sınır, boşken yazılan ifade) ve değerleri / `{ values: { anahtar: metin } }` ile metinleri değiştirme |
+| PUT, DELETE | `/site/content/texts/{anahtar}/image` | Görsel alanına (`logo`, `favicon`, `heroImage`) görsel yükle (`certificates/{id}/image` ile aynı kurallar) / kaldır |
 | GET, POST | `/site/content/about`, `/team`, `/technologies`, `/links` | İçerik listesi (gizliler dahil), listenin sonuna yeni kayıt |
 | PUT, DELETE | `/site/content/{liste}/{id}` | Kaydı düzenle, sil |
 | PUT | `/site/content/{liste}/order` | Sıralama: `{ ids: [...] }` ilk sıradan son sıraya |
-| PUT, DELETE | `/site/content/team/{id}/photo` | Ekip fotoğrafı yükle (`certificates/{id}/image` ile aynı kurallar) / kaldır |
+| PUT, DELETE | `/site/content/team/{id}/photo`, `/site/content/about/{id}/image` | Ekip fotoğrafı / kart görseli yükle (aynı kurallar) / kaldır |
 
 ### Kurallar
 
@@ -131,8 +132,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | `Certificates` | `certificates` | Doğrulama kodu `Code` sütununda (eski ID'ler taşınırsa buraya yazılır). Görsel `storage/certificates` altında. |
 | `SiteSettings` | `activePanels` + `activityCounters` | Tek satır: ana sayfa butonu ve geri sayım. |
 | `VisitorCounters` | `counters` | |
-| `SiteTexts` | — | Sitedeki tek parça metinler, anahtar/değer. Anahtarlar `Utilities/SiteTextCatalog.cs`'te tanımlı. |
-| `AboutCards`, `TeamMembers`, `Technologies`, `SiteLinks` | — | Ana sayfa listeleri. `SortOrder` ile sıralanır; teknolojiler dışındakiler gizlenebilir (`IsVisible`). Ekip fotoğrafları `storage/team` altında. |
+| `SiteTexts` | — | Sitedeki tek parça metinler ve görseller (logo, sekme simgesi, giriş görseli), anahtar/değer. Anahtarlar `Utilities/SiteTextCatalog.cs`'te tanımlı. |
+| `AboutCards`, `TeamMembers`, `Technologies`, `SiteLinks` | — | Ana sayfa listeleri. `SortOrder` ile sıralanır; teknolojiler dışındakiler gizlenebilir (`IsVisible`). Kartlarda isteğe bağlı görsel var. |
 | — | `sessions` | Kaldırıldı. Spam koruması istek sınırıyla yapılıyor. |
 
 Yeni migration eklemek için:
@@ -158,11 +159,10 @@ server/Ygt.WebAPI/
   Services/         İş kuralları; DbContext'i doğrudan kullanır
   Controllers/      İnce katman: servisi çağırır
   Options/          JWT ve dosya saklama ayarları
-  Providers/        JWT, Excel üretimi, görsel saklama (sertifika ve ekip fotoğrafı)
+  Providers/        JWT, Excel üretimi, görsel saklama (sertifika görselleri ve sitenin görselleri)
   Middlewares/      Hataları { message } olarak döndüren handler
   Extensions/       Controller, hata biçimi ve istek sınırı kurulumu
   Utilities/        Girdi doğrulama, Türkiye saati, site metinlerinin tanımları, sıralama
-  SeedData/         İlk kurulumda storage'a kopyalanan ekip fotoğrafları
 ```
 
 ## Ön yüz klasör yapısı
@@ -170,7 +170,7 @@ server/Ygt.WebAPI/
 ```
 web/
   apps/ui/          Site: ana sayfa, eğitim / etkinlik / hackathon başvurusu, geri sayım, sertifika doğrulama.
-                    Bütün içerik API'den gelir; kodda sadece logo ve arayüz yazıları (form etiketleri gibi) var.
+                    Logo dahil bütün içerik API'den gelir; kodda sadece arayüz yazıları (form etiketleri gibi) var.
   apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar, site içeriği
   libraries/        Ortak kod: HttpService, hata bildirimleri, token, modeller, simgeler, ortak stiller ve fontlar
   nginx.conf        Docker'da siteyi, paneli ve /api yönlendirmesini sunar

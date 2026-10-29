@@ -4,17 +4,18 @@ Veritabanı, API, site, yönetim paneli, Docker kurulumu, sitenin içeriğinin p
 
 ## Tamamlananlar
 
-- [x] **Sitenin içeriğini panelden yönetmek.** Metinler (giriş bölümü, "Bize katıl", alt bilgi, teşekkür ve KVKK metni, sayfa başlığı ve açıklaması), hakkımızda kartları, ekip (fotoğraf, sıralama, gizleme), teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden yönetiliyor. Bugünkü içerik ilk kurulumda veritabanına yazılıyor. Kodda logo ve arayüz yazıları (form etiketleri, bölüm başlıkları gibi) dışında sabit içerik kalmadı.
-  - Sayfa başlığı ve açıklaması site açıldıktan sonra JavaScript ile değişiyor. Google bunu okuyor, ama bağlantı önizlemesi gösteren bazı uygulamalar (WhatsApp vb.) `index.html`'deki varsayılan değeri gösterebilir.
+- [x] **Sitenin içeriğini panelden yönetmek.** Logo, sekme simgesi, giriş görseli, bütün metinler (giriş bölümü, bölüm başlıkları, "Bize katıl", alt bilgi, başvuru sayfaları, teşekkür ve KVKK metni, sertifika notu, sayfa başlığı ve açıklaması), hakkımızda kartları (görselli), ekip (fotoğraf, sıralama, gizleme), teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden yönetiliyor. İçerik boş başlıyor, hazır veri ya da görsel yok. Kodda sadece arayüz yazıları (form etiketleri, butonlar gibi) var.
+  - Sayfa başlığı ve açıklaması site açıldıktan sonra JavaScript ile değişiyor. Google bunu okuyor, ama bağlantı önizlemesi gösteren bazı uygulamalar (WhatsApp vb.) `web/apps/ui/src/index.html`'deki başlığı gösterebilir; topluluk adı değişirse orası da elle değiştirilmeli.
 - [x] `client/` klasörünü sil (Nx şablonundan kalma).
 - [x] **KVKK: başvuruların silinmesi.** Panelde başvurular tek tek ya da toplu silinebiliyor. Otomatik silme yok.
 
 ## 1. Yayına almadan önce
 
 - [ ] Sunucuya kurulum: Docker ile kurulum, HTTPS.
+- [ ] Site içeriğini panelden gir: logo, sekme simgesi, metinler, KVKK metni, ekip ve fotoğrafları, kartlar, teknolojiler, bağlantılar. Eski metinler ve KVKK metni `872b38b` commit'indeki `server/Ygt.WebAPI/Utilities/SiteTextCatalog.cs`'te, ekip fotoğrafları aynı commit'te `server/Ygt.WebAPI/SeedData/team` altında duruyor.
 - [ ] `.env` içindeki geliştirme değerlerini değiştir: `MSSQL_SA_PASSWORD`, `JWT_SECRET_KEY`, `ADMIN_PASSWORD`.
 - [ ] Alan adını (`yazilimgelistirme.ktun.edu.tr`) eski Node sitesinden yeni sisteme geçir.
-- [ ] Yedekleme: `mssql-data` (veritabanı) ve `api-storage` (sertifika görselleri, ekip fotoğrafları) volume'ları için düzenli yedek.
+- [ ] Yedekleme: `mssql-data` (veritabanı) ve `api-storage` (sertifika görselleri, panelden yüklenen site görselleri) volume'ları için düzenli yedek.
 - [ ] Eski Node sistemi geçiş gününe kadar yayında kalacaksa:
   - `GET /getAllAppeal` başvuranların TC ve telefon bilgisini herkese açık döndürüyor; admin kontrolüne alınmalı.
   - Repoda açıkta duran şifreler (veritabanı, JWT anahtarı, admin) değiştirilmeli.

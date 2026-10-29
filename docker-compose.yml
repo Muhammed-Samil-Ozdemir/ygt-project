@@ -30,7 +30,7 @@ services:
       Jwt__SecretKey: ${JWT_SECRET_KEY:?JWT_SECRET_KEY .env dosyasında ayarlanmalı}
       Seed__Admin__Email: ${ADMIN_EMAIL:-admin@ygt.com}
       Seed__Admin__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD .env dosyasında ayarlanmalı}
-    # Sertifika görselleri ve ekip fotoğrafları.
+    # Sertifika görselleri ve panelden yüklenen site görselleri (logo, ekip fotoğrafları...).
     volumes:
       - api-storage:/app/storage
     depends_on:
