@@ -36,6 +36,8 @@ public static class SiteTextCatalog
     private const string Hero = "Ana sayfa girişi";
     private const string Sections = "Bölüm başlıkları";
     private const string Join = "Bize katıl";
+    private const string Membership = "Resmi üyelik";
+    private const string Games = "Oyunlar";
     private const string Footer = "Alt bilgi";
     private const string Applications = "Başvurular";
     private const string OtherPages = "Diğer sayfalar";
@@ -191,6 +193,82 @@ public static class SiteTextCatalog
             Label = "Kart metni",
             Kind = SiteTextKind.LongText,
             MaxLength = 1000
+        },
+        new()
+        {
+            Key = "membershipUrl",
+            Group = Membership,
+            Label = "Üyelik bağlantısı",
+            Hint = "Öğrencilerin resmi üye olduğu sistem, ör. https://topluluk.ktun.edu.tr. Bölüm ana sayfada ekip fotoğraflarının altında görünür; boş bırakılırsa gösterilmez.",
+            Kind = SiteTextKind.Url,
+            MaxLength = 500
+        },
+        new()
+        {
+            Key = "membershipTitle",
+            Group = Membership,
+            Label = "Başlık",
+            MaxLength = 100,
+            Placeholder = "Resmi üye ol"
+        },
+        new()
+        {
+            Key = "membershipText",
+            Group = Membership,
+            Label = "Açıklama",
+            Hint = "Ör. üye olma adımları.",
+            Kind = SiteTextKind.LongText,
+            MaxLength = 500
+        },
+        new()
+        {
+            Key = "membershipButton",
+            Group = Membership,
+            Label = "Buton yazısı",
+            MaxLength = 40,
+            Placeholder = "Üyelik için tıklayınız"
+        },
+        new()
+        {
+            Key = "gamesUrl",
+            Group = Games,
+            Label = "Oyunların bağlantısı",
+            Hint = "Boş bırakılırsa ana sayfadaki bölüm ve üst menüdeki bağlantı gösterilmez.",
+            Kind = SiteTextKind.Url,
+            MaxLength = 500
+        },
+        new()
+        {
+            Key = "gamesTitle",
+            Group = Games,
+            Label = "Bölüm başlığı",
+            Hint = "Üst menüde de bu yazı görünür.",
+            MaxLength = 60,
+            Placeholder = "Oyunlar"
+        },
+        new()
+        {
+            Key = "gamesText",
+            Group = Games,
+            Label = "Açıklama",
+            Kind = SiteTextKind.LongText,
+            MaxLength = 500
+        },
+        new()
+        {
+            Key = "gamesButton",
+            Group = Games,
+            Label = "Buton yazısı",
+            MaxLength = 40,
+            Placeholder = "Oyunlara git"
+        },
+        new()
+        {
+            Key = "gamesImage",
+            Group = Games,
+            Label = "Görsel",
+            Hint = "Kartın yanında görünür, ör. oyunlardan bir ekran görüntüsü. Yüklenmezse oyun kolu simgesi gösterilir.",
+            Kind = SiteTextKind.Image
         },
         new()
         {
