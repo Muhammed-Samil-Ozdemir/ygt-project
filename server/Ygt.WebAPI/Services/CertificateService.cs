@@ -7,8 +7,23 @@ using Ygt.WebAPI.Utilities;
 
 namespace Ygt.WebAPI.Services;
 
-public sealed class CertificateService(AppDbContext dbContext, ImageStorageProvider imageStorage)
+public sealed class CertificateService(
+    AppDbContext dbContext,
+    ImageStorageProvider imageStorage,
+    ExcelProvider excelProvider)
 {
+    // Toplu ekleme şablonunun sütunları.
+    private const string CourseNameHeader = "Eğitim adı";
+    private const string FirstNameHeader = "Ad";
+    private const string LastNameHeader = "Soyad";
+    private const string EmailHeader = "E-posta";
+    private const string PhoneHeader = "Telefon";
+
+    private static readonly string[] ImportHeaders =
+        [CourseNameHeader, FirstNameHeader, LastNameHeader, EmailHeader, PhoneHeader];
+
+    private const int MaxImportRows = 1000;
+
     public async Task<CertificateDto> GetByCodeAsync(string code, CancellationToken cancellationToken) =>
         await dbContext.Certificates
             .Where(c => c.Code == code)
@@ -96,6 +111,82 @@ public sealed class CertificateService(AppDbContext dbContext, ImageStorageProvi
 
         certificate.ImageFileName = fileName;
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>Toplu ekleme için boş Excel şablonu: sadece başlık satırı.</summary>
+    public FileDto GetImportTemplate() =>
+        excelProvider.CreateFile(
+            "sertifika-sablonu.xlsx",
+            "Sertifikalar",
+            Array.Empty<string>(),
+            ImportHeaders.Select(header => (header, (Func<string, string?>)(_ => null))).ToArray());
+
+    /// <summary>
+    /// Excel'deki her satır için bir sertifika oluşturur. Bir satır bile hatalıysa hiçbiri eklenmez ve hatalı
+    /// satırlar numarasıyla bildirilir; dosya düzeltilip tekrar yüklenir.
+    /// </summary>
+    public async Task<MessageDto> ImportAsync(IFormFile? file, CancellationToken cancellationToken)
+    {
+        var rows = excelProvider.ReadRows(file, ImportHeaders, MaxImportRows);
+        if (rows.Count == 0)
+            throw Errors.BadRequest("Excel'de sertifika satırı bulunamadı.");
+
+        var certificates = new List<Certificate>();
+        var errors = new List<string>();
+
+        foreach (var row in rows)
+        {
+            try
+            {
+                var certificate = new Certificate { Code = Guid.NewGuid().ToString() };
+                Fill(certificate, new CertificateCommandDto(
+                    row[CourseNameHeader], row[FirstNameHeader], row[LastNameHeader], row[EmailHeader], row[PhoneHeader]));
+                certificates.Add(certificate);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                errors.Add($"{row.Number}. satır: {exception.Message}");
+            }
+        }
+
+        if (errors.Count == 1)
+            throw Errors.BadRequest($"{errors[0]} Hiçbir sertifika eklenmedi.");
+
+        if (errors.Count > 1)
+        {
+            var shown = string.Join(" ", errors.Take(5));
+            var more = errors.Count > 5 ? $" (ve {errors.Count - 5} satır daha)" : "";
+            throw Errors.BadRequest($"{errors.Count} satırda hata var, hiçbir sertifika eklenmedi. {shown}{more}");
+        }
+
+        dbContext.Certificates.AddRange(certificates);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new MessageDto($"{certificates.Count} sertifika eklendi.");
+    }
+
+    /// <summary>
+    /// Bütün sertifikaları doğrulama linkleriyle Excel'e aktarır (kişilere link dağıtmak için).
+    /// siteUrl: sitenin adresi, ör. "https://yazilimgelistirme.ktun.edu.tr"; panel kendi adresini gönderir.
+    /// </summary>
+    public async Task<FileDto> ExportAsync(string? siteUrl, CancellationToken cancellationToken)
+    {
+        var baseUrl = Input.RequiredUrl(siteUrl, "Site adresi").TrimEnd('/');
+
+        var certificates = await dbContext.Certificates.AsNoTracking()
+            .OrderBy(c => c.CourseName)
+            .ThenBy(c => c.FirstName)
+            .ThenBy(c => c.LastName)
+            .ToListAsync(cancellationToken);
+
+        return excelProvider.CreateFile("sertifikalar.xlsx", "Sertifikalar", certificates,
+            (FirstNameHeader, c => c.FirstName),
+            (LastNameHeader, c => c.LastName),
+            (CourseNameHeader, c => c.CourseName),
+            (EmailHeader, c => c.Email),
+            (PhoneHeader, c => c.PhoneNumber),
+            ("Doğrulama linki", c => $"{baseUrl}/certificates/{Uri.EscapeDataString(c.Code)}"),
+            ("Oluşturulma", c => TurkeyTime.Format(c.CreatedAt)));
     }
 
     private static void Fill(Certificate certificate, CertificateCommandDto request)

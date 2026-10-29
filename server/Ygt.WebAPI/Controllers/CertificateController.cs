@@ -25,6 +25,30 @@ public class CertificateController(CertificateService service) : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken) =>
         Ok(await service.GetAllAsync(cancellationToken));
 
+    /// <summary>Bütün sertifikalar doğrulama linkleriyle Excel olarak. siteUrl: linklerin başındaki site adresi.</summary>
+    [HttpGet("export")]
+    [Authorize]
+    public async Task<IActionResult> Export([FromQuery] string? siteUrl, CancellationToken cancellationToken)
+    {
+        var file = await service.ExportAsync(siteUrl, cancellationToken);
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    /// <summary>Toplu ekleme için boş Excel şablonu.</summary>
+    [HttpGet("import/template")]
+    [Authorize]
+    public IActionResult GetImportTemplate()
+    {
+        var file = service.GetImportTemplate();
+        return File(file.Content, file.ContentType, file.FileName);
+    }
+
+    /// <summary>Excel'den toplu ekleme; multipart/form-data, "file" alanı. Hatalı satır varsa hiçbiri eklenmez.</summary>
+    [HttpPost("import")]
+    [Authorize]
+    public async Task<IActionResult> Import(IFormFile? file, CancellationToken cancellationToken) =>
+        Ok(await service.ImportAsync(file, cancellationToken));
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create(CertificateCommandDto request, CancellationToken cancellationToken) =>

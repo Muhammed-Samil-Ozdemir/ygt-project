@@ -97,6 +97,20 @@ public static partial class Input
     }
 
     /// <summary>TC kimlik numarasını biçimine ve kontrol hanelerine göre doğrular.</summary>
+    /// <summary>
+    /// Şifre kuralı: en az 8, en fazla 128 karakter. Baştaki ve sondaki boşluklar şifrenin parçası sayılır, kırpılmaz.
+    /// </summary>
+    public static string Password(string? value, string label)
+    {
+        if (string.IsNullOrEmpty(value))
+            throw Errors.BadRequest($"{label} zorunludur.");
+
+        if (value.Length < 8 || value.Length > 128)
+            throw Errors.BadRequest($"{label} en az 8, en fazla 128 karakter olmalıdır.");
+
+        return value;
+    }
+
     public static string? OptionalTcNumber(string? value)
     {
         var tcNumber = Clean(value);

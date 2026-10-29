@@ -21,6 +21,7 @@ builder.Services.Configure<AdminSeedOptions>(builder.Configuration.GetSection("S
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<SiteService>();
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<FormService>();

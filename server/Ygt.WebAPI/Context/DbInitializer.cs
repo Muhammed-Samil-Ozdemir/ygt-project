@@ -31,8 +31,9 @@ public static class DbInitializer
     }
 
     /// <summary>
-    /// Admin kullanıcısını oluşturur. Kullanıcı zaten varsa adını ve şifresini ayarlardakiyle eşitler;
-    /// şifreyi değiştirmek için ayarı değiştirip uygulamayı yeniden başlatmak yeterli.
+    /// İlk kurulumda, hiç yönetici yokken ayarlardaki bilgilerle ilk yöneticiyi oluşturur. Sonraki açılışlarda
+    /// yöneticilere dokunmaz; şifreler ve yeni yöneticiler panelden yönetilir.
+    /// Şifre unutulursa Seed:Admin:ResetPassword=true ile bir kez başlatılarak ayardaki şifreye dönülür.
     /// </summary>
     private static async Task SeedAdminAsync(
         AppDbContext dbContext,
@@ -40,9 +41,13 @@ public static class DbInitializer
         ILogger logger,
         CancellationToken cancellationToken)
     {
+        var hasUsers = await dbContext.Users.AnyAsync(cancellationToken);
+        if (hasUsers && !options.ResetPassword)
+            return;
+
         if (string.IsNullOrWhiteSpace(options.Password))
         {
-            logger.LogWarning("Seed:Admin:Password ayarlanmamış, admin kullanıcısı oluşturulmadı.");
+            logger.LogWarning("Seed:Admin:Password ayarlanmamış, yönetici oluşturulmadı ya da şifresi sıfırlanmadı.");
             return;
         }
 
@@ -57,22 +62,16 @@ public static class DbInitializer
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(options.Password)
             });
             await dbContext.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Admin kullanıcısı oluşturuldu: {Email}", options.Email);
+            logger.LogInformation("Yönetici oluşturuldu: {Email}", options.Email);
             return;
         }
 
-        if (!admin.VerifyPassword(options.Password))
-        {
-            admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(options.Password);
-        }
-
-        admin.Name = options.Name;
-
-        if (dbContext.ChangeTracker.HasChanges())
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
-            logger.LogInformation("Admin kullanıcısı güncellendi: {Email}", options.Email);
-        }
+        admin.PasswordHash = BCrypt.Net.BCrypt.HashPassword(options.Password);
+        admin.IsActive = true;
+        await dbContext.SaveChangesAsync(cancellationToken);
+        logger.LogWarning(
+            "Yöneticinin şifresi ayardaki şifreye döndürüldü: {Email}. Seed:Admin:ResetPassword ayarını şimdi kapatın.",
+            options.Email);
     }
 
     /// <summary>Site ayarlarının tek satırını ve ana sayfa ziyaret sayacını oluşturur.</summary>
