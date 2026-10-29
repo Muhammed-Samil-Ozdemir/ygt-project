@@ -1,0 +1,2 @@
+# Betikler Linux sunucuda çalışacak; Windows'ta da LF satır sonuyla kalsın.
+*.sh text eol=lf
