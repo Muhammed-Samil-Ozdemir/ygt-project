@@ -29,7 +29,19 @@ yönetici yönetimi, sertifika araçları, yedekleme, testler ve CI tamam. Kalan
 - [ ] Hackathon KVKK metni "verileriniz en fazla 6 ay saklanacak" diyor, ama başvurular otomatik silinmiyor. Ya metin panelden güncellenmeli ya da süresi dolan başvurular panelden elle silinmeli.
 - [ ] Repo GitHub'a gönderildiğinde CI'ın ilk çalışmasının geçtiğini kontrol et (Actions sekmesi).
 
-## 2. İsteğe bağlı iyileştirmeler
+## 2. Sıradaki iş: hazır başlangıç içeriği
+
+- [ ] **Site ilk kurulumda boş açılmasın; temel içerik hazır gelsin, panelden değiştirilebilsin.**
+  - **Production ve geliştirme (ikisi de):** İlk kurulumda temel içerik eklensin. Metinler eski sitedeki içerikten alınsın: giriş bölümü, bölüm başlıkları, hakkımızda kartları, "Bize katıl", KVKK metni, alt bilgi, teşekkür metinleri, sayfa başlığı ve açıklaması. Teknolojiler, bağlantılar (sosyal medya, resmi üyelik, oyunlar) ve logo da eklensin. Amaç sadece sitenin boş durmaması; kullananlar sonra panelden değiştirir ya da siler.
+  - **Sadece geliştirme:** Temel içeriğin üzerine örnek veri de gelsin: fotoğraflı etkinlikler, ekip ve fotoğrafları, örnek eğitim, form, başvuru ve sertifika. Böylece site ve panel ekranları denerken dolu görünür.
+  - Kaynak: `872b38b` commit'indeki eski metinler (`server/Ygt.WebAPI/Utilities/SiteTextCatalog.cs`) ve ekip fotoğrafları (`server/Ygt.WebAPI/SeedData/team`).
+  - Önemli kural: Başlangıç içeriği sadece bir kez, ilk kurulumda eklenmeli. "Boşsa ekle" diye her açılışta kontrol edilirse, panelden bilerek silinen ya da boşaltılan içerik yeniden başlatmada geri gelir. Eklendiği bir yerde işaretlenmeli (ör. site ayarlarında "başlangıç içeriği eklendi" bilgisi) ve mevcut içeriğin üzerine asla yazılmamalı.
+  - Karar verilecek:
+    - Ekip production'a hazır gelsin mi? Eski yönetim kurulu değişmiş olabilir; belki sadece geliştirmede.
+    - Örnek veri nasıl açılacak? Docker kurulumu da Production ortamında çalıştığı için ortam adına değil, ayrı bir ayara bağlanmalı (ör. `.env`'de `SEED_SAMPLE_CONTENT=true`, varsayılan kapalı).
+  - Mevcut kurulumlarda (içeriği zaten girilmiş veritabanında) bir şey değişmemeli.
+
+## 3. İsteğe bağlı iyileştirmeler
 
 - [ ] **Veri taşıma:** Eski MySQL verisinin (özellikle sertifikaların) taşınması. Altyapı hazır: eski sertifika ID'leri `Certificates.Code` sütununa yazılırsa eski doğrulama linkleri de çalışır.
 - [ ] **Excel'i e-postayla gönderme:** Eski sistemde vardı, yeni sistemde başvurular doğrudan indiriliyor. İstenirse eklenebilir (SMTP bilgisi gerekir).
