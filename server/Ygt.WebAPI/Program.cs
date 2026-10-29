@@ -25,9 +25,15 @@ builder.Services.AddScoped<SiteService>();
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<FormService>();
 builder.Services.AddScoped<CertificateService>();
+builder.Services.AddScoped<SiteContentService>();
+builder.Services.AddScoped<AboutCardService>();
+builder.Services.AddScoped<TeamMemberService>();
+builder.Services.AddScoped<TechnologyService>();
+builder.Services.AddScoped<SiteLinkService>();
 
 builder.Services.AddScoped<JwtProvider>();
 builder.Services.AddSingleton<ExcelProvider>();
+builder.Services.AddSingleton<ImageStorageProvider>();
 
 builder.Services.AddYgtControllers();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

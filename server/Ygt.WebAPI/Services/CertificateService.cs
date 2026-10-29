@@ -1,31 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Ygt.WebAPI.Context;
 using Ygt.WebAPI.Dtos;
 using Ygt.WebAPI.Models;
-using Ygt.WebAPI.Options;
+using Ygt.WebAPI.Providers;
 using Ygt.WebAPI.Utilities;
 
 namespace Ygt.WebAPI.Services;
 
-public sealed class CertificateService(
-    AppDbContext dbContext,
-    IOptions<StorageOptions> storageOptions,
-    IWebHostEnvironment environment)
+public sealed class CertificateService(AppDbContext dbContext, ImageStorageProvider imageStorage)
 {
-    private const long MaxImageSize = 5 * 1024 * 1024;
-
-    private static readonly Dictionary<string, string> ImageContentTypes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        [".png"] = "image/png",
-        [".jpg"] = "image/jpeg",
-        [".jpeg"] = "image/jpeg",
-        [".webp"] = "image/webp"
-    };
-
-    private string ImageDirectory =>
-        Path.Combine(environment.ContentRootPath, storageOptions.Value.RootPath, "certificates");
-
     public async Task<CertificateDto> GetByCodeAsync(string code, CancellationToken cancellationToken) =>
         await dbContext.Certificates
             .Where(c => c.Code == code)
@@ -40,12 +23,8 @@ public sealed class CertificateService(
             .Select(c => c.ImageFileName)
             .FirstOrDefaultAsync(cancellationToken);
 
-        var path = fileName is null ? null : Path.Combine(ImageDirectory, fileName);
-        if (path is null || !File.Exists(path))
-            throw Errors.NotFound("Sertifika görseli bulunamadı.");
-
-        var content = await File.ReadAllBytesAsync(path, cancellationToken);
-        return new FileDto(content, ImageContentTypes[Path.GetExtension(path)], fileName!);
+        return await imageStorage.ReadAsync(
+            ImageStorageProvider.Certificates, fileName, "Sertifika görseli bulunamadı.", cancellationToken);
     }
 
     public async Task<List<CertificateListItemDto>> GetAllAsync(CancellationToken cancellationToken) =>
@@ -101,34 +80,19 @@ public sealed class CertificateService(
         dbContext.Certificates.Remove(certificate);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        DeleteImageFile(certificate.ImageFileName);
+        imageStorage.Delete(ImageStorageProvider.Certificates, certificate.ImageFileName);
     }
 
     /// <summary>Görseli sertifika ID'siyle adlandırıp kaydeder. Önceki görsel varsa yerine geçer.</summary>
     public async Task UploadImageAsync(Guid id, IFormFile? file, CancellationToken cancellationToken)
     {
-        if (file is null || file.Length == 0)
-            throw Errors.BadRequest("Görsel dosyası seçilmelidir.");
-
-        if (file.Length > MaxImageSize)
-            throw Errors.BadRequest("Görsel en fazla 5 MB olabilir.");
-
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!ImageContentTypes.ContainsKey(extension))
-            throw Errors.BadRequest("Sadece PNG, JPG veya WEBP görsel yüklenebilir.");
-
         var certificate = await FindAsync(id, cancellationToken);
 
-        Directory.CreateDirectory(ImageDirectory);
-        var fileName = $"{certificate.Id}{extension}";
-
-        await using (var stream = File.Create(Path.Combine(ImageDirectory, fileName)))
-        {
-            await file.CopyToAsync(stream, cancellationToken);
-        }
+        var fileName = await imageStorage.SaveAsync(
+            ImageStorageProvider.Certificates, certificate.Id.ToString(), file, cancellationToken);
 
         if (certificate.ImageFileName != fileName)
-            DeleteImageFile(certificate.ImageFileName);
+            imageStorage.Delete(ImageStorageProvider.Certificates, certificate.ImageFileName);
 
         certificate.ImageFileName = fileName;
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -141,16 +105,6 @@ public sealed class CertificateService(
         certificate.LastName = Input.RequiredText(request.LastName, "Soyad", 2, 100);
         certificate.Email = Input.OptionalEmail(request.Email, "E-posta");
         certificate.PhoneNumber = Input.OptionalPhone(request.PhoneNumber, "Telefon numarası");
-    }
-
-    private void DeleteImageFile(string? fileName)
-    {
-        if (fileName is null)
-            return;
-
-        var path = Path.Combine(ImageDirectory, fileName);
-        if (File.Exists(path))
-            File.Delete(path);
     }
 
     private async Task<Certificate> FindAsync(Guid id, CancellationToken cancellationToken) =>

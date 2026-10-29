@@ -124,6 +124,26 @@ public sealed class CourseService(AppDbContext dbContext, ExcelProvider excelPro
             .ToListAsync(cancellationToken);
     }
 
+    public async Task DeleteApplicationAsync(Guid courseId, Guid applicationId, CancellationToken cancellationToken)
+    {
+        var deleted = await dbContext.CourseApplications
+            .Where(a => a.CourseId == courseId && a.Id == applicationId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (deleted == 0)
+            throw Errors.NotFound("Başvuru bulunamadı.");
+    }
+
+    /// <summary>Eğitimin bütün başvurularını kalıcı olarak siler (KVKK). Eğitimin kendisi kalır. Silinen sayıyı döndürür.</summary>
+    public async Task<int> DeleteApplicationsAsync(Guid courseId, CancellationToken cancellationToken)
+    {
+        await FindAsync(courseId, cancellationToken);
+
+        return await dbContext.CourseApplications
+            .Where(a => a.CourseId == courseId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     public async Task<FileDto> ExportApplicationsAsync(Guid courseId, CancellationToken cancellationToken)
     {
         var course = await FindAsync(courseId, cancellationToken);

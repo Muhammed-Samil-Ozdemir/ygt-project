@@ -15,6 +15,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Certificate> Certificates => Set<Certificate>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
     public DbSet<VisitorCounter> VisitorCounters => Set<VisitorCounter>();
+    public DbSet<SiteText> SiteTexts => Set<SiteText>();
+    public DbSet<AboutCard> AboutCards => Set<AboutCard>();
+    public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
+    public DbSet<Technology> Technologies => Set<Technology>();
+    public DbSet<SiteLink> SiteLinks => Set<SiteLink>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

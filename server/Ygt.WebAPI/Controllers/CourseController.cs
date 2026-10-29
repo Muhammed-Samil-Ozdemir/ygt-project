@@ -62,6 +62,22 @@ public class CourseController(CourseService service) : ControllerBase
     public async Task<IActionResult> GetApplications(Guid id, CancellationToken cancellationToken) =>
         Ok(await service.GetApplicationsAsync(id, cancellationToken));
 
+    [HttpDelete("{id:guid}/applications")]
+    [Authorize]
+    public async Task<IActionResult> DeleteApplications(Guid id, CancellationToken cancellationToken)
+    {
+        var count = await service.DeleteApplicationsAsync(id, cancellationToken);
+        return Ok(new MessageDto($"{count} başvuru silindi."));
+    }
+
+    [HttpDelete("{id:guid}/applications/{applicationId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteApplication(Guid id, Guid applicationId, CancellationToken cancellationToken)
+    {
+        await service.DeleteApplicationAsync(id, applicationId, cancellationToken);
+        return Ok();
+    }
+
     [HttpGet("{id:guid}/applications/export")]
     [Authorize]
     public async Task<IActionResult> ExportApplications(Guid id, CancellationToken cancellationToken)

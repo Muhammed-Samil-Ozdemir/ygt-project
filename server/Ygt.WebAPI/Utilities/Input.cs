@@ -75,6 +75,27 @@ public static partial class Input
         BadHttpRequestException Invalid() => Errors.BadRequest($"{label} geçerli değil. Örnek: 0555 123 45 67");
     }
 
+    public static string RequiredUrl(string? value, string label) =>
+        OptionalUrl(value, label) ?? throw Errors.BadRequest($"{label} zorunludur.");
+
+    /// <summary>
+    /// Sadece http(s) ve mailto bağlantıları kabul edilir. "javascript:" gibi adresler sitede
+    /// tıklanınca kod çalıştırabileceği için reddedilir.
+    /// </summary>
+    public static string? OptionalUrl(string? value, string label)
+    {
+        var url = Clean(value);
+        if (url is null)
+            return null;
+
+        if (url.Length > 500
+            || !Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            || uri.Scheme is not ("http" or "https" or "mailto"))
+            throw Errors.BadRequest($"{label} geçerli değil. Örnek: https://www.instagram.com/ktunygt/");
+
+        return url;
+    }
+
     /// <summary>TC kimlik numarasını biçimine ve kontrol hanelerine göre doğrular.</summary>
     public static string? OptionalTcNumber(string? value)
     {

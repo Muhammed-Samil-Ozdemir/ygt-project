@@ -220,6 +220,45 @@ public sealed class FormService(AppDbContext dbContext, ExcelProvider excelProvi
             .ToList();
     }
 
+    public async Task DeleteApplicationAsync(Guid formId, Guid applicationId, CancellationToken cancellationToken)
+    {
+        var deleted = await dbContext.FormApplications
+            .Where(a => a.FormId == formId && a.Id == applicationId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (deleted == 0)
+            throw Errors.NotFound("Başvuru bulunamadı.");
+    }
+
+    public async Task DeleteHackathonApplicationAsync(Guid formId, Guid applicationId, CancellationToken cancellationToken)
+    {
+        var deleted = await dbContext.HackathonApplications
+            .Where(a => a.FormId == formId && a.Id == applicationId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (deleted == 0)
+            throw Errors.NotFound("Takım başvurusu bulunamadı.");
+    }
+
+    /// <summary>
+    /// Formun bütün başvurularını (bireysel ya da takım) kalıcı olarak siler (KVKK). Formun kendisi kalır.
+    /// Silinen başvuru sayısını döndürür.
+    /// </summary>
+    public async Task<int> DeleteApplicationsAsync(Guid formId, CancellationToken cancellationToken)
+    {
+        await FindAsync(formId, cancellationToken);
+
+        var applications = await dbContext.FormApplications
+            .Where(a => a.FormId == formId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        var teams = await dbContext.HackathonApplications
+            .Where(a => a.FormId == formId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        return applications + teams;
+    }
+
     /// <summary>Formun türüne göre bireysel ya da takım başvurularını Excel'e aktarır.</summary>
     public async Task<FileDto> ExportApplicationsAsync(Guid formId, CancellationToken cancellationToken)
     {

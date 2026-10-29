@@ -77,6 +77,31 @@ public class FormController(FormService service) : ControllerBase
     public async Task<IActionResult> GetHackathonApplications(Guid id, CancellationToken cancellationToken) =>
         Ok(await service.GetHackathonApplicationsAsync(id, cancellationToken));
 
+    /// <summary>Formun türüne bakılmaksızın bütün başvurularını siler.</summary>
+    [HttpDelete("{id:guid}/applications")]
+    [Authorize]
+    public async Task<IActionResult> DeleteApplications(Guid id, CancellationToken cancellationToken)
+    {
+        var count = await service.DeleteApplicationsAsync(id, cancellationToken);
+        return Ok(new MessageDto($"{count} başvuru silindi."));
+    }
+
+    [HttpDelete("{id:guid}/applications/{applicationId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteApplication(Guid id, Guid applicationId, CancellationToken cancellationToken)
+    {
+        await service.DeleteApplicationAsync(id, applicationId, cancellationToken);
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}/hackathon-applications/{applicationId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteHackathonApplication(Guid id, Guid applicationId, CancellationToken cancellationToken)
+    {
+        await service.DeleteHackathonApplicationAsync(id, applicationId, cancellationToken);
+        return Ok();
+    }
+
     [HttpGet("{id:guid}/applications/export")]
     [Authorize]
     public async Task<IActionResult> ExportApplications(Guid id, CancellationToken cancellationToken)

@@ -22,4 +22,9 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- İlk kurulumda ekip fotoğrafları bu klasörden storage'a kopyalanır (Context/DbInitializer.cs). -->
+    <None Update="SeedData\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
