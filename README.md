@@ -51,8 +51,11 @@ npx nx serve admin            # http://localhost:4201/admin/
 
 Geliştirme sunucusu `/api` isteklerini `proxy.conf.json` ile `localhost:5146`'ya yönlendirir; Docker'daki nginx de aynı yolu kullanır.
 
-API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları ve ana sayfa ziyaret sayacı.
+API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları, ana sayfa ziyaret sayacı ve site içeriği.
 Ayardaki admin şifresi değişirse bir sonraki açılışta veritabanındaki şifre de güncellenir.
+
+Site içeriği (metinler, hakkımızda kartları, ekip, teknolojiler, bağlantılar) ilk kurulumda eski sitedeki içerikle doldurulur; ekip fotoğrafları `server/Ygt.WebAPI/SeedData/team` klasöründen storage'a kopyalanır.
+Listeler sadece ilk kurulumda doldurulur, panelden silinen kayıtlar geri gelmez. `SiteTextCatalog`'a sonradan eklenen metinler ise bir sonraki açılışta varsayılan değeriyle eklenir.
 
 ## API
 
@@ -65,6 +68,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 |---|---|---|
 | POST | `/auth/login` | `{ email, password }` → `{ token, expiresAt }` |
 | GET | `/site/settings` | Ana sayfa butonu (`course` / `form`) ve geri sayım |
+| GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin), `about`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla |
+| GET | `/site/content/photos/{dosya}` | Ekip fotoğrafı. Dosya adı her yüklemede değiştiği için uzun süre önbelleğe alınabilir |
 | POST | `/site/visits/{page}` | Ziyaret sayacını artırır (şimdilik sadece `home`) |
 | GET | `/courses/active` | Aktif eğitimler |
 | POST | `/courses/{id}/applications` | Eğitim başvurusu |
@@ -90,9 +95,17 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | POST | `/forms/{id}/close`, `/forms/{id}/reopen` | Formu kapat / yeniden aç |
 | GET | `/forms/{id}/applications`, `/forms/{id}/hackathon-applications` | Başvurular |
 | GET | `/forms/{id}/applications/export` | Başvurular Excel olarak (türüne göre) |
+| DELETE | `/courses/{id}/applications`, `/courses/{id}/applications/{basvuruId}` | Başvuruların hepsini / birini kalıcı olarak siler (KVKK) |
+| DELETE | `/forms/{id}/applications` | Formun bütün başvurularını siler (türüne bakılmaz) |
+| DELETE | `/forms/{id}/applications/{basvuruId}`, `/forms/{id}/hackathon-applications/{basvuruId}` | Tek başvuruyu / takımı siler |
 | GET, POST | `/certificates` | Tüm sertifikalar, yeni sertifika (doğrulama kodu otomatik) |
 | PUT, DELETE | `/certificates/{id}` | Düzenle, sil |
 | PUT | `/certificates/{id}/image` | Görsel yükle (`multipart/form-data`, alan adı `file`, PNG/JPG/WEBP, en fazla 5 MB) |
+| GET, PUT | `/site/content/texts` | Tek parça metinler: tanımları (etiket, tür, sınır) ve değerleri / `{ values: { anahtar: metin } }` ile değiştirme |
+| GET, POST | `/site/content/about`, `/team`, `/technologies`, `/links` | İçerik listesi (gizliler dahil), listenin sonuna yeni kayıt |
+| PUT, DELETE | `/site/content/{liste}/{id}` | Kaydı düzenle, sil |
+| PUT | `/site/content/{liste}/order` | Sıralama: `{ ids: [...] }` ilk sıradan son sıraya |
+| PUT, DELETE | `/site/content/team/{id}/photo` | Ekip fotoğrafı yükle (`certificates/{id}/image` ile aynı kurallar) / kaldır |
 
 ### Kurallar
 
@@ -102,6 +115,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 - Aynı anda tek aktif form olur. Yeni form açmak ya da formu yeniden açmak, açık olan formu kapatır.
 - Eğitim oluşturmak ana sayfa butonunu `course`, form açmak `form` yapar. Form kapanınca buton `course`'a döner (eski sistemdeki davranış).
 - İstek sınırı (IP başına, dakikada): 60 başvuru, 5 giriş denemesi. `appsettings.json` > `RateLimiting` ile değiştirilebilir.
+- Başvurular otomatik silinmez. KVKK gereği silinmesi gerekenler panelden tek tek ya da toplu silinir (eğitim ve formun kendisi kalır).
+- Site içeriği düz metindir, HTML olarak yorumlanmaz. Bağlantılar sadece `http(s)` ve `mailto` olabilir.
 
 ## Veritabanı
 
@@ -116,6 +131,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | `Certificates` | `certificates` | Doğrulama kodu `Code` sütununda (eski ID'ler taşınırsa buraya yazılır). Görsel `storage/certificates` altında. |
 | `SiteSettings` | `activePanels` + `activityCounters` | Tek satır: ana sayfa butonu ve geri sayım. |
 | `VisitorCounters` | `counters` | |
+| `SiteTexts` | — | Sitedeki tek parça metinler, anahtar/değer. Anahtarlar `Utilities/SiteTextCatalog.cs`'te tanımlı. |
+| `AboutCards`, `TeamMembers`, `Technologies`, `SiteLinks` | — | Ana sayfa listeleri. `SortOrder` ile sıralanır; teknolojiler dışındakiler gizlenebilir (`IsVisible`). Ekip fotoğrafları `storage/team` altında. |
 | — | `sessions` | Kaldırıldı. Spam koruması istek sınırıyla yapılıyor. |
 
 Yeni migration eklemek için:
@@ -131,9 +148,9 @@ Not: `sqlcmd` ile veri yazarken `-I` parametresi gerekir. `Forms` tablosundaki f
 
 ```
 server/Ygt.WebAPI/
-  Abstractions/     BaseEntity (Id, CreatedAt, UpdatedAt)
+  Abstractions/     BaseEntity (Id, CreatedAt, UpdatedAt), ISortable (panelden sıralanan listeler)
   Models/           Entity'ler
-  Enums/            FormType, HomeButton
+  Enums/            FormType, HomeButton, SiteTextKind
   Configurations/   EF Core tablo ayarları (IEntityTypeConfiguration)
   Context/          AppDbContext, açılışta migration + seed
   Migrations/
@@ -141,19 +158,21 @@ server/Ygt.WebAPI/
   Services/         İş kuralları; DbContext'i doğrudan kullanır
   Controllers/      İnce katman: servisi çağırır
   Options/          JWT ve dosya saklama ayarları
-  Providers/        JWT ve Excel üretimi
+  Providers/        JWT, Excel üretimi, görsel saklama (sertifika ve ekip fotoğrafı)
   Middlewares/      Hataları { message } olarak döndüren handler
   Extensions/       Controller, hata biçimi ve istek sınırı kurulumu
-  Utilities/        Girdi doğrulama, Türkiye saati
+  Utilities/        Girdi doğrulama, Türkiye saati, site metinlerinin tanımları, sıralama
+  SeedData/         İlk kurulumda storage'a kopyalanan ekip fotoğrafları
 ```
 
 ## Ön yüz klasör yapısı
 
 ```
 web/
-  apps/ui/          Site: ana sayfa, eğitim / etkinlik / hackathon başvurusu, geri sayım, sertifika doğrulama
-  apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar
-  libraries/        Ortak kod: HttpService, hata bildirimleri, token, modeller, ortak stiller ve fontlar
+  apps/ui/          Site: ana sayfa, eğitim / etkinlik / hackathon başvurusu, geri sayım, sertifika doğrulama.
+                    Bütün içerik API'den gelir; kodda sadece logo ve arayüz yazıları (form etiketleri gibi) var.
+  apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar, site içeriği
+  libraries/        Ortak kod: HttpService, hata bildirimleri, token, modeller, simgeler, ortak stiller ve fontlar
   nginx.conf        Docker'da siteyi, paneli ve /api yönlendirmesini sunar
 ```
 
@@ -165,4 +184,6 @@ Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. E
 - [x] Backend API: herkese açık ve admin uçları, JWT, istek sınırı, Excel, sertifika görseli, Docker
 - [x] Angular ön yüz: site ve yönetim paneli
 - [x] Tek Docker kurulumu: nginx ön yüzü sunar, `/api` isteklerini API'ye yönlendirir
-- [ ] Sitenin içeriğini panelden yönetmek ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)
+- [x] Sitenin içeriğini panelden yönetmek
+- [x] KVKK: başvuruları panelden silme
+- [ ] Yayına alma ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)
