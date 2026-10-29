@@ -1,19 +1,17 @@
 <div class="container page">
   <div class="card form-card">
     @if (sent()) {
-      <div class="stack result">
-        <h1>Başvurunuz alındı</h1>
-        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
-        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
-      </div>
+      <app-application-sent />
     } @else if (closedMessage(); as message) {
-      <div class="stack result">
+      <div class="result">
+        <span class="result-icon"><ygt-icon name="clipboard" /></span>
         <h1>Etkinlik başvurusu</h1>
         <p class="muted">{{ message }}</p>
         <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
       </div>
     } @else if (form(); as form) {
-      <div class="stack">
+      <div class="form-head">
+        <span class="form-head-icon"><ygt-icon name="clipboard" /></span>
         <h1>{{ form.title }}</h1>
         @if (form.content) {
           <p class="muted pre-line">{{ form.content }}</p>
@@ -50,12 +48,12 @@
           <input id="email" class="input" type="email" name="email" autocomplete="email" [(ngModel)]="model.email" />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+        <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="sending()">
           {{ sending() ? 'Gönderiliyor...' : 'Başvur' }}
         </button>
       </form>
     } @else {
-      <p class="muted">Yükleniyor...</p>
+      <p class="loading">Yükleniyor...</p>
     }
   </div>
 </div>

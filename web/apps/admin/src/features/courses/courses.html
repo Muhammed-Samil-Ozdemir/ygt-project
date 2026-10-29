@@ -1,11 +1,14 @@
 <div class="page-header">
   <h1>Eğitimler</h1>
-  <a class="btn btn-primary" routerLink="new">Yeni eğitim</a>
+  <a class="btn btn-primary" routerLink="new">
+    <ygt-icon name="plus" />
+    Yeni eğitim
+  </a>
 </div>
 
 @let courseList = courses();
 @if (courseList === null) {
-  <p class="muted">Yükleniyor...</p>
+  <p class="loading">Yükleniyor...</p>
 } @else if (courseList.length === 0) {
   <div class="card empty">Henüz eğitim yok.</div>
 } @else {

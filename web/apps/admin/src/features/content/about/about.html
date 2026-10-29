@@ -1,0 +1,86 @@
+@let list = items();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <p class="muted section-note">
+    Kartlar ana sayfadaki "Hakkımızda" bölümünde bu sırayla görünür. "Bize katıl" kartının metni Metinler sekmesinde.
+  </p>
+
+  <div class="item-list">
+    @for (card of list; track card.id) {
+      <form class="card item-card" [class.is-hidden]="!card.isVisible" (ngSubmit)="save(card)" novalidate>
+        <div class="item-head">
+          <span class="item-index">{{ $index + 1 }}</span>
+          <strong class="item-title">{{ card.title || 'Başlıksız kart' }}</strong>
+          @if (!card.isVisible) {
+            <span class="badge">Gizli</span>
+          }
+          @if (isDirty(card)) {
+            <span class="badge badge-warning">Kaydedilmedi</span>
+          }
+          <div class="item-tools">
+            <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
+              <ygt-icon name="arrow-up" />
+            </button>
+            <button type="button" class="btn btn-ghost btn-icon" aria-label="Aşağı taşı" [disabled]="$last || busyId() !== null" (click)="move($index, 1)">
+              <ygt-icon name="arrow-down" />
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost btn-icon btn-icon-danger"
+              aria-label="Kartı sil"
+              [disabled]="busyId() === card.id"
+              (click)="remove(card, '“' + card.title + '” kartı silinsin mi?')"
+            >
+              <ygt-icon name="trash" />
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label [for]="card.id + '-title'">Başlık</label>
+          <input [id]="card.id + '-title'" class="input" name="title" maxlength="100" [(ngModel)]="card.title" />
+        </div>
+        <div class="field">
+          <label [for]="card.id + '-text'">Metin</label>
+          <textarea [id]="card.id + '-text'" class="textarea" name="text" maxlength="1000" [(ngModel)]="card.text"></textarea>
+        </div>
+
+        <div class="item-foot">
+          <label class="checkbox">
+            <input type="checkbox" name="isVisible" [(ngModel)]="card.isVisible" />
+            <span>Sitede göster</span>
+          </label>
+          <button
+            type="submit"
+            class="btn btn-sm"
+            [class.btn-primary]="isDirty(card)"
+            [class.btn-outline]="!isDirty(card)"
+            [disabled]="!isDirty(card) || busyId() === card.id"
+          >
+            <ygt-icon name="check" />
+            Kaydet
+          </button>
+        </div>
+      </form>
+    } @empty {
+      <div class="card empty">Henüz kart yok. Aşağıdan ekleyebilirsiniz.</div>
+    }
+  </div>
+
+  <form class="card item-card new-item" (ngSubmit)="add()" novalidate>
+    <h2 class="card-title"><ygt-icon name="plus" /> Yeni kart</h2>
+    <div class="field">
+      <label for="new-title">Başlık</label>
+      <input id="new-title" class="input" name="title" maxlength="100" placeholder="ör. Biz kimiz?" [(ngModel)]="newCard.title" />
+    </div>
+    <div class="field">
+      <label for="new-text">Metin</label>
+      <textarea id="new-text" class="textarea" name="text" maxlength="1000" [(ngModel)]="newCard.text"></textarea>
+    </div>
+    <div class="item-foot">
+      <span class="muted small">Kart listenin sonuna eklenir.</span>
+      <button type="submit" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Ekleniyor...' : 'Kartı ekle' }}</button>
+    </div>
+  </form>
+}

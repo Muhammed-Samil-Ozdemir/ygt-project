@@ -1,0 +1,71 @@
+@let list = items();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <p class="muted section-note">
+    Alt bilgideki "Bizi takip edin" listesi. "Bize Katılın" formu ve üniversite bağlantısı Metinler sekmesinde.
+  </p>
+
+  <div class="row-list">
+    @for (link of list; track link.id) {
+      <form class="list-row link-row" [class.is-hidden]="!link.isVisible" (ngSubmit)="save(link)" novalidate>
+        <span class="item-index">{{ $index + 1 }}</span>
+        <div class="field">
+          <label [for]="link.id + '-label'" class="small">Ad</label>
+          <input [id]="link.id + '-label'" class="input" name="label" maxlength="50" [(ngModel)]="link.label" />
+        </div>
+        <div class="field link-url">
+          <label [for]="link.id + '-url'" class="small">Adres</label>
+          <input [id]="link.id + '-url'" class="input" type="url" name="url" maxlength="500" [(ngModel)]="link.url" />
+        </div>
+        <label class="checkbox link-visible">
+          <input type="checkbox" name="isVisible" [(ngModel)]="link.isVisible" />
+          <span>Göster</span>
+        </label>
+        <div class="item-tools">
+          @if (isDirty(link)) {
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="busyId() === link.id">Kaydet</button>
+          }
+          <a class="btn btn-ghost btn-icon" [href]="link.url" target="_blank" rel="noopener" aria-label="Bağlantıyı aç">
+            <ygt-icon name="external" />
+          </a>
+          <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
+            <ygt-icon name="arrow-up" />
+          </button>
+          <button type="button" class="btn btn-ghost btn-icon" aria-label="Aşağı taşı" [disabled]="$last || busyId() !== null" (click)="move($index, 1)">
+            <ygt-icon name="arrow-down" />
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost btn-icon btn-icon-danger"
+            aria-label="Bağlantıyı sil"
+            [disabled]="busyId() === link.id"
+            (click)="remove(link, '“' + link.label + '” bağlantısı silinsin mi?')"
+          >
+            <ygt-icon name="trash" />
+          </button>
+        </div>
+      </form>
+    } @empty {
+      <div class="empty">Henüz bağlantı yok.</div>
+    }
+  </div>
+
+  <form class="card item-card new-item" (ngSubmit)="add()" novalidate>
+    <h2 class="card-title"><ygt-icon name="plus" /> Yeni bağlantı</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="new-label">Ad</label>
+        <input id="new-label" class="input" name="label" maxlength="50" placeholder="ör. YouTube" [(ngModel)]="newLink.label" />
+      </div>
+      <div class="field">
+        <label for="new-url">Adres</label>
+        <input id="new-url" class="input" type="url" name="url" maxlength="500" placeholder="https://..." [(ngModel)]="newLink.url" />
+      </div>
+    </div>
+    <div class="item-foot">
+      <span class="muted small">Bağlantı listenin sonuna eklenir.</span>
+      <button type="submit" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Ekleniyor...' : 'Bağlantıyı ekle' }}</button>
+    </div>
+  </form>
+}

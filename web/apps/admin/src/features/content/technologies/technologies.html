@@ -1,0 +1,47 @@
+@let list = items();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <p class="muted section-note">Ana sayfadaki "Çalıştığımız teknolojiler" bölümünde bu sırayla etiket olarak görünür.</p>
+
+  <form class="card new-row" (ngSubmit)="add()" novalidate>
+    <label for="new-technology" class="visually-hidden">Yeni teknoloji</label>
+    <input id="new-technology" class="input" name="name" maxlength="50" placeholder="Yeni teknoloji, ör. Flutter" [(ngModel)]="newName" />
+    <button type="submit" class="btn btn-primary" [disabled]="adding()">
+      <ygt-icon name="plus" />
+      Ekle
+    </button>
+  </form>
+
+  <div class="row-list">
+    @for (technology of list; track technology.id) {
+      <form class="list-row" (ngSubmit)="save(technology)" novalidate>
+        <span class="item-index">{{ $index + 1 }}</span>
+        <label [for]="technology.id" class="visually-hidden">Teknoloji adı</label>
+        <input [id]="technology.id" class="input" name="name" maxlength="50" [(ngModel)]="technology.name" />
+        <div class="item-tools">
+          @if (isDirty(technology)) {
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="busyId() === technology.id">Kaydet</button>
+          }
+          <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
+            <ygt-icon name="arrow-up" />
+          </button>
+          <button type="button" class="btn btn-ghost btn-icon" aria-label="Aşağı taşı" [disabled]="$last || busyId() !== null" (click)="move($index, 1)">
+            <ygt-icon name="arrow-down" />
+          </button>
+          <button
+            type="button"
+            class="btn btn-ghost btn-icon btn-icon-danger"
+            aria-label="Teknolojiyi sil"
+            [disabled]="busyId() === technology.id"
+            (click)="remove(technology, '“' + technology.name + '” silinsin mi?')"
+          >
+            <ygt-icon name="trash" />
+          </button>
+        </div>
+      </form>
+    } @empty {
+      <div class="empty">Henüz teknoloji yok.</div>
+    }
+  </div>
+}

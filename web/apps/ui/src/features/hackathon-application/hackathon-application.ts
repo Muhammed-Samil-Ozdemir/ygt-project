@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -13,12 +14,14 @@ import {
   Form,
   HackathonApplicationCommand,
   HttpService,
+  Icon,
   ToastService,
 } from '@ygt/libraries';
-import { KVKK_TEXT } from './kvkk-text';
+import { ApplicationSent } from '../../components/application-sent';
+import { SiteService } from '../../services/site';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [ApplicationSent, FormsModule, Icon, RouterLink],
   templateUrl: './hackathon-application.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,8 +30,10 @@ export default class HackathonApplication implements OnInit {
   readonly #http = inject(HttpService);
   readonly #router = inject(Router);
   readonly #toast = inject(ToastService);
+  readonly #site = inject(SiteService);
 
-  protected readonly kvkkText = KVKK_TEXT;
+  /** Aydınlatma metni panelden ("Başvurular" grubu) gelir. */
+  protected readonly kvkkText = computed(() => this.#site.content()?.texts.kvkkText ?? null);
   protected readonly form = signal<Form | null>(null);
   protected readonly closedMessage = signal<string | null>(null);
   protected readonly sending = signal(false);
@@ -43,9 +48,9 @@ export default class HackathonApplication implements OnInit {
   };
 
   protected readonly members = [
-    { key: 'member1', title: '1. üye (takım kaptanı)', optional: false },
-    { key: 'member2', title: '2. üye', optional: false },
-    { key: 'member3', title: '3. üye', optional: true },
+    { key: 'member1', title: 'Takım kaptanı', optional: false },
+    { key: 'member2', title: 'İkinci üye', optional: false },
+    { key: 'member3', title: 'Üçüncü üye', optional: true },
   ] as const;
 
   ngOnInit() {

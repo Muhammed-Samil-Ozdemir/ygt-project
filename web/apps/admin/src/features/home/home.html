@@ -1,37 +1,56 @@
 <div class="page-header">
-  <h1>Panel</h1>
+  <div>
+    <h1>Panel</h1>
+    <p class="muted">Sitenin genel durumu ve ana sayfa ayarları.</p>
+  </div>
 </div>
 
 <div class="stats">
   <div class="card stat">
-    <span class="muted small">Ana sayfa ziyareti</span>
-    <strong class="stat-value">{{ visits() ?? '...' }}</strong>
+    <span class="stat-icon"><ygt-icon name="chart" /></span>
+    <span class="stat-body">
+      <span class="stat-label">Ana sayfa ziyareti</span>
+      <strong class="stat-value">{{ visits() ?? '...' }}</strong>
+    </span>
   </div>
   <a class="card stat" routerLink="/courses">
-    <span class="muted small">Başvuruya açık eğitim</span>
-    <strong class="stat-value">{{ activeCourses() ?? '...' }}</strong>
+    <span class="stat-icon"><ygt-icon name="book" /></span>
+    <span class="stat-body">
+      <span class="stat-label">Başvuruya açık eğitim</span>
+      <strong class="stat-value">{{ activeCourses() ?? '...' }}</strong>
+    </span>
   </a>
   <a class="card stat" routerLink="/forms">
-    <span class="muted small">Açık etkinlik formu</span>
-    @let form = activeForm();
-    <strong class="stat-text">
-      @if (form === undefined) {
-        ...
-      } @else if (form === null) {
-        Yok
-      } @else {
-        {{ form.title }}
-      }
-    </strong>
+    <span class="stat-icon"><ygt-icon name="clipboard" /></span>
+    <span class="stat-body">
+      <span class="stat-label">Açık etkinlik formu</span>
+      @let form = activeForm();
+      <strong class="stat-text">
+        @if (form === undefined) {
+          ...
+        } @else if (form === null) {
+          Yok
+        } @else {
+          {{ form.title }}
+        }
+      </strong>
+    </span>
+  </a>
+  <a class="card stat" routerLink="/content">
+    <span class="stat-icon"><ygt-icon name="layout" /></span>
+    <span class="stat-body">
+      <span class="stat-label">Site içeriği</span>
+      <strong class="stat-text">Metinler, ekip, bağlantılar</strong>
+    </span>
   </a>
 </div>
 
 <section class="card settings-card">
   <div class="stack">
-    <h2>Site ayarları</h2>
+    <h2 class="card-title">Site ayarları</h2>
 
     @if (!settingsLoaded()) {
-      <p class="muted">Yükleniyor...</p>
+      <p class="loading">Yükleniyor...</p>
     } @else {
       <form class="stack" (ngSubmit)="saveSettings()" novalidate>
         <fieldset>

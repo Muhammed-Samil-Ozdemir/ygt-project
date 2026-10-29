@@ -13,6 +13,7 @@ import {
   FormListItem,
   HomeButton,
   HttpService,
+  Icon,
   SiteSettings,
   SiteSettingsCommand,
   ToastService,
@@ -21,7 +22,7 @@ import {
 import { fromLocalInput, toLocalInput } from '../../utils/date';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, Icon, RouterLink],
   templateUrl: './home.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

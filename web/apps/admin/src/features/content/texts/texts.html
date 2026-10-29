@@ -1,0 +1,57 @@
+@let list = groups();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <form class="stack" (ngSubmit)="save()" novalidate>
+    @for (group of list; track group.name) {
+      <section class="card text-group">
+        <h2 class="card-title">{{ group.name }}</h2>
+        <div class="stack">
+          @for (field of group.fields; track field.key) {
+            <div class="field">
+              <label [for]="field.key">
+                {{ field.label }}
+                @if (!field.isRequired) {
+                  <span class="optional">(isteğe bağlı)</span>
+                }
+              </label>
+              @if (field.kind === 'longText') {
+                <textarea
+                  [id]="field.key"
+                  class="textarea"
+                  [class.textarea-tall]="field.maxLength > 2000"
+                  [name]="field.key"
+                  [maxlength]="field.maxLength"
+                  [(ngModel)]="field.value"
+                ></textarea>
+              } @else {
+                <input
+                  [id]="field.key"
+                  class="input"
+                  [type]="field.kind === 'url' ? 'url' : 'text'"
+                  [name]="field.key"
+                  [maxlength]="field.maxLength"
+                  [placeholder]="field.kind === 'url' ? 'https://...' : ''"
+                  [(ngModel)]="field.value"
+                />
+              }
+              <div class="field-meta">
+                <span class="hint">{{ field.hint }}</span>
+                @if (field.kind !== 'url') {
+                  <span class="counter">{{ field.value.length }} / {{ field.maxLength }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="save-bar">
+      <span class="muted small">Metin içinde HTML kullanılamaz; yazdığınız gibi gösterilir. Satır sonları korunur.</span>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Kaydediliyor...' : 'Metinleri kaydet' }}
+      </button>
+    </div>
+  </form>
+}

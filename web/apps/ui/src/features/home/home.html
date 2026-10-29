@@ -1,74 +1,134 @@
+@let site = content();
+
 <section class="hero">
+  <div class="hero-backdrop" aria-hidden="true"></div>
+
   <div class="container hero-inner">
     <div class="hero-text">
-      <p class="eyebrow">Konya Teknik Üniversitesi</p>
-      <h1 class="hero-title"><span class="brand-accent">Yazılım</span> Geliştirme Topluluğu</h1>
-      <p class="hero-lead">
-        Web, mobil ve oyun geliştirmeye ilgi duyan öğrencilerin birlikte öğrendiği, proje ürettiği ve etkinlikler
-        düzenlediği topluluk.
-      </p>
-      <div class="row">
-        <a class="btn btn-primary" [href]="links.join" target="_blank" rel="noopener">Bize Katılın</a>
-        <a class="btn btn-outline" routerLink="/" fragment="about">Bizi tanıyın</a>
+      @if (site; as site) {
+        @if (site.texts.heroEyebrow) {
+          <p class="hero-eyebrow">
+            <span class="hero-eyebrow-dot"></span>
+            {{ site.texts.heroEyebrow }}
+          </p>
+        }
+        <h1 class="hero-title"><app-accent-text [text]="site.texts.heroTitle" /></h1>
+        @if (site.texts.heroLead) {
+          <p class="hero-lead pre-line">{{ site.texts.heroLead }}</p>
+        }
+        <div class="row hero-actions">
+          @if (site.texts.joinUrl) {
+            <a class="btn btn-primary btn-lg" [href]="site.texts.joinUrl" target="_blank" rel="noopener">
+              {{ site.texts.joinButton }}
+              <ygt-icon name="arrow-right" />
+            </a>
+          }
+          @if (site.texts.heroSecondaryButton) {
+            <a class="btn btn-outline btn-lg" routerLink="/" fragment="about">{{ site.texts.heroSecondaryButton }}</a>
+          }
+        </div>
+      } @else {
+        <div class="hero-skeleton" aria-hidden="true">
+          <span class="skeleton" style="width: 40%"></span>
+          <span class="skeleton skeleton-title"></span>
+          <span class="skeleton skeleton-title" style="width: 70%"></span>
+          <span class="skeleton" style="width: 90%"></span>
+          <span class="skeleton" style="width: 75%"></span>
+        </div>
+      }
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-orbit"></div>
+      <div class="hero-logo-wrap">
+        <img class="hero-logo" src="images/logo.png" alt="" width="200" height="210" />
       </div>
     </div>
-    <img class="hero-logo" src="images/logo.png" alt="Yazılım Geliştirme Topluluğu logosu" width="220" height="231" />
   </div>
 </section>
 
 @if (countdown(); as countdown) {
-  <section class="container">
-    <a class="countdown-banner" routerLink="/counter">
-      <span class="countdown-banner-title">{{ countdown.title }}</span>
-      <span class="countdown-banner-time">
-        {{ countdown.left.days }} gün {{ countdown.left.hours }} saat {{ countdown.left.minutes }} dakika
-        {{ countdown.left.seconds }} saniye
-      </span>
+  <section class="container countdown-section">
+    <a class="countdown-card" routerLink="/counter">
+      <div class="countdown-text">
+        <span class="countdown-label"><ygt-icon name="clock" /> Geri sayım</span>
+        <strong class="countdown-title">{{ countdown.title }}</strong>
+      </div>
+      <div class="countdown-units">
+        @for (part of countdown.parts; track part.unit) {
+          <div class="countdown-unit">
+            <span class="countdown-value">{{ part.value }}</span>
+            <span class="countdown-name">{{ part.unit }}</span>
+          </div>
+        }
+      </div>
     </a>
   </section>
 }
 
-<section id="about" class="section section-alt">
-  <div class="container">
-    <h2 class="section-title">Hakkımızda</h2>
-    <div class="about-grid">
-      @for (item of about; track item.title) {
-        <article class="card">
-          <h3>{{ item.title }}</h3>
-          <p class="muted">{{ item.text }}</p>
-        </article>
-      }
-      <article class="card join-card">
-        <h3>Bize katıl!</h3>
-        <p class="muted">{{ joinText }}</p>
-        <a class="btn btn-primary" [href]="links.join" target="_blank" rel="noopener">Bize Katılın</a>
-      </article>
-    </div>
-  </div>
-</section>
+@if (site; as site) {
+  @if (site.about.length || site.texts.joinUrl) {
+    <section id="about" class="section">
+      <div class="container">
+        <h2 class="section-title">Hakkımızda</h2>
+        <div class="about-grid">
+          @for (item of site.about; track $index) {
+            <article class="card about-card">
+              <span class="about-number" aria-hidden="true">{{ number($index) }}</span>
+              <h3>{{ item.title }}</h3>
+              <p class="muted pre-line">{{ item.text }}</p>
+            </article>
+          }
+          @if (site.texts.joinUrl) {
+            <article class="card join-card">
+              <h3>{{ site.texts.joinTitle }}</h3>
+              @if (site.texts.joinText) {
+                <p class="pre-line">{{ site.texts.joinText }}</p>
+              }
+              <a class="btn btn-lg join-button" [href]="site.texts.joinUrl" target="_blank" rel="noopener">
+                {{ site.texts.joinButton }}
+                <ygt-icon name="arrow-right" />
+              </a>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+  }
 
-<section id="team" class="section">
-  <div class="container">
-    <h2 class="section-title">Ekibimiz</h2>
-    <ul class="team-grid">
-      @for (member of team; track member.name) {
-        <li class="member">
-          <img [src]="'images/team/' + member.photo" [alt]="member.name" width="160" height="160" loading="lazy" />
-          <strong>{{ member.name }}</strong>
-          <span class="muted small">{{ member.role }}</span>
-        </li>
-      }
-    </ul>
-  </div>
-</section>
+  @if (site.team.length) {
+    <section id="team" class="section section-alt">
+      <div class="container">
+        <h2 class="section-title">Ekibimiz</h2>
+        <ul class="team-grid">
+          @for (member of site.team; track $index) {
+            <li class="member">
+              <div class="member-photo">
+                @if (member.photo; as photo) {
+                  <img [src]="photoUrl(photo)" [alt]="member.name" width="240" height="240" loading="lazy" />
+                } @else {
+                  <span class="member-initials" aria-hidden="true">{{ initials(member.name) }}</span>
+                }
+              </div>
+              <strong class="member-name">{{ member.name }}</strong>
+              <span class="member-role">{{ member.role }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    </section>
+  }
 
-<section class="section section-alt">
-  <div class="container">
-    <h2 class="section-title">Çalıştığımız teknolojiler</h2>
-    <ul class="chips">
-      @for (technology of technologies; track technology) {
-        <li class="chip">{{ technology }}</li>
-      }
-    </ul>
-  </div>
-</section>
+  @if (site.technologies.length) {
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">Çalıştığımız teknolojiler</h2>
+        <ul class="chips">
+          @for (technology of site.technologies; track $index) {
+            <li class="chip">{{ technology }}</li>
+          }
+        </ul>
+      </div>
+    </section>
+  }
+}

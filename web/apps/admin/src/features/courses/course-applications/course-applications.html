@@ -6,17 +6,24 @@
     <p class="muted">Eğitim başvuruları</p>
   </div>
   @if (applications()?.length) {
-    <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
-      {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
-    </button>
+    <div class="row">
+      <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
+        <ygt-icon name="download" />
+        {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="deletingAll()" (click)="removeAll()">
+        <ygt-icon name="trash" />
+        {{ deletingAll() ? 'Siliniyor...' : 'Tümünü sil' }}
+      </button>
+    </div>
   }
 </div>
 
 @let list = applications();
 @if (list === null) {
-  <p class="muted">Yükleniyor...</p>
+  <p class="loading">Yükleniyor...</p>
 } @else if (list.length === 0) {
-  <div class="card empty">Bu eğitime henüz başvuru yapılmadı.</div>
+  <div class="card empty">Bu eğitime ait başvuru yok.</div>
 } @else {
   <p class="muted small list-count">{{ list.length }} başvuru</p>
   <div class="table-wrap">
@@ -30,18 +37,32 @@
             <th>TC kimlik no</th>
           }
           <th>Başvuru tarihi</th>
+          <th><span class="visually-hidden">İşlemler</span></th>
         </tr>
       </thead>
       <tbody>
         @for (application of list; track application.id) {
           <tr>
-            <td>{{ application.firstName }} {{ application.lastName }}</td>
+            <td><strong>{{ application.firstName }} {{ application.lastName }}</strong></td>
             <td>{{ application.email }}</td>
             <td class="nowrap">{{ application.phoneNumber | phone }}</td>
             @if (hasTcNumber()) {
               <td>{{ application.tcNumber }}</td>
             }
             <td class="nowrap">{{ application.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+            <td>
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-icon btn-icon-danger"
+                  aria-label="Başvuruyu sil"
+                  [disabled]="deletingId() === application.id"
+                  (click)="remove(application)"
+                >
+                  <ygt-icon name="trash" />
+                </button>
+              </div>
+            </td>
           </tr>
         }
       </tbody>

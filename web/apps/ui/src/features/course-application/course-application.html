@@ -3,15 +3,12 @@
     @let courseList = courses();
 
     @if (sent()) {
-      <div class="stack result">
-        <h1>Başvurunuz alındı</h1>
-        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
-        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
-      </div>
+      <app-application-sent />
     } @else if (courseList === null) {
-      <p class="muted">Yükleniyor...</p>
+      <p class="loading">Yükleniyor...</p>
     } @else if (courseList.length === 0) {
-      <div class="stack result">
+      <div class="result">
+        <span class="result-icon"><ygt-icon name="book" /></span>
         <h1>Eğitim başvurusu</h1>
         <p class="muted">
           Şu anda başvuruya açık bir eğitim bulunmuyor. Yeni eğitimleri sosyal medya hesaplarımızdan duyuruyoruz.
@@ -19,7 +16,10 @@
         <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
       </div>
     } @else {
-      <h1>Eğitim başvurusu</h1>
+      <div class="form-head">
+        <span class="form-head-icon"><ygt-icon name="book" /></span>
+        <h1>Eğitim başvurusu</h1>
+      </div>
 
       <form class="stack" (ngSubmit)="submit()" novalidate>
         <div class="field">
@@ -64,7 +64,7 @@
           />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+        <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="sending()">
           {{ sending() ? 'Gönderiliyor...' : 'Başvur' }}
         </button>
       </form>

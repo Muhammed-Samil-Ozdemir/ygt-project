@@ -1,28 +1,33 @@
 <div class="container page">
   <div class="card form-card certificate-card">
-    <p class="eyebrow">Sertifika doğrulama</p>
-
     @if (certificate(); as certificate) {
-      <div class="stack">
-        <span class="badge badge-success">Geçerli sertifika</span>
-        <h1>{{ certificate.firstName }} {{ certificate.lastName }}</h1>
-        <p class="certificate-course">{{ certificate.courseName }}</p>
+      <div class="certificate-head">
+        <span class="result-icon result-icon-success"><ygt-icon name="award" /></span>
+        <div class="stack certificate-info">
+          <span class="badge badge-success">Geçerli sertifika</span>
+          <h1>{{ certificate.firstName }} {{ certificate.lastName }}</h1>
+          <p class="certificate-course">{{ certificate.courseName }}</p>
+        </div>
       </div>
 
       @if (certificate.hasImage) {
         <img class="certificate-image" [src]="imageUrl()" [alt]="certificate.courseName + ' sertifikası'" />
       }
 
-      <p class="muted small">
-        Bu sertifika Konya Teknik Üniversitesi Yazılım Geliştirme Topluluğu tarafından verilmiştir.
+      <p class="muted small certificate-note">
+        <ygt-icon name="shield" />
+        Bu sertifika Konya Teknik Üniversitesi Yazılım Geliştirme Topluluğu tarafından verilmiştir. Doğrulama kodu:
+        <code>{{ certificate.code }}</code>
       </p>
     } @else if (notFound()) {
-      <div class="stack">
+      <div class="result">
+        <span class="result-icon result-icon-danger"><ygt-icon name="x" /></span>
         <h1>Sertifika bulunamadı</h1>
         <p class="muted">Doğrulama kodu hatalı olabilir. Linki kontrol edip tekrar deneyin.</p>
+        <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
       </div>
     } @else {
-      <p class="muted">Yükleniyor...</p>
+      <p class="loading">Sertifika doğrulanıyor...</p>
     }
   </div>
 </div>

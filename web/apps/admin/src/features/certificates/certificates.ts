@@ -8,10 +8,10 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CertificateListItem, HttpService, ToastService } from '@ygt/libraries';
+import { CertificateListItem, HttpService, Icon, ToastService } from '@ygt/libraries';
 
 @Component({
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, Icon, RouterLink],
   templateUrl: './certificates.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

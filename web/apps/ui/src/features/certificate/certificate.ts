@@ -8,9 +8,11 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
-import { Certificate, HttpService } from '@ygt/libraries';
+import { RouterLink } from '@angular/router';
+import { Certificate, HttpService, Icon } from '@ygt/libraries';
 
 @Component({
+  imports: [Icon, RouterLink],
   templateUrl: './certificate.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

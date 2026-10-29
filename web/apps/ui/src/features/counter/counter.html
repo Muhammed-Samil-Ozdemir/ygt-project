@@ -1,4 +1,5 @@
 <div class="counter-page">
+  <div class="counter-glow" aria-hidden="true"></div>
   <img class="counter-logo" src="images/logo.png" alt="Yazılım Geliştirme Topluluğu logosu" width="120" height="126" />
 
   @if (countdown(); as countdown) {
@@ -6,7 +7,7 @@
     <div class="counter-grid">
       @for (part of countdown.parts; track part.unit) {
         <div class="counter-cell">
-          <span class="counter-value">{{ part.value.toString().padStart(2, '0') }}</span>
+          <span class="counter-value">{{ part.value }}</span>
           <span class="counter-unit">{{ part.unit }}</span>
         </div>
       }

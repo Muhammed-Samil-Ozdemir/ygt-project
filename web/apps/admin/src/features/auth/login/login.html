@@ -1,11 +1,10 @@
 <div class="login-page">
+  <div class="login-glow" aria-hidden="true"></div>
   <div class="card login-card">
-    <div class="stack login-head">
-      <img src="images/logo.png" alt="" width="52" height="55" />
-      <div>
-        <h1>Yönetim paneli</h1>
-        <p class="muted small">Yazılım Geliştirme Topluluğu</p>
-      </div>
+    <div class="login-head">
+      <img src="images/logo.png" alt="" width="56" height="58" />
+      <h1>Yönetim paneli</h1>
+      <p class="muted small">Yazılım Geliştirme Topluluğu</p>
     </div>
 
     <form class="stack" (ngSubmit)="login()" novalidate>
@@ -24,7 +23,7 @@
           [(ngModel)]="model.password"
         />
       </div>
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+      <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="sending()">
         {{ sending() ? 'Giriş yapılıyor...' : 'Giriş yap' }}
       </button>
     </form>

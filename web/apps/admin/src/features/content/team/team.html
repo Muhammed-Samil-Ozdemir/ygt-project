@@ -1,0 +1,111 @@
+@let list = items();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <p class="muted section-note">
+    Ana sayfadaki "Ekibimiz" bölümü. Kişiler bu sırayla görünür; gizlenen kişi sitede görünmez ama burada kalır.
+    Fotoğraf PNG, JPG ya da WEBP olabilir, en fazla 5 MB. Kare fotoğraf en iyi sonucu verir.
+  </p>
+
+  <div class="team-editor">
+    @for (member of list; track member.id) {
+      <form class="card member-card" [class.is-hidden]="!member.isVisible" (ngSubmit)="save(member)" novalidate>
+        <div class="member-photo-edit">
+          @if (member.photo; as photo) {
+            <img [src]="photoUrl(photo)" [alt]="member.name" width="120" height="120" />
+          } @else {
+            <span class="member-photo-empty"><ygt-icon name="image" /></span>
+          }
+          <div class="member-photo-actions">
+            <input #photoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="uploadPhoto(member, $event)" />
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="photoBusyId() === member.id" (click)="photoInput.click()">
+              {{ photoBusyId() === member.id ? 'Yükleniyor...' : member.photo ? 'Değiştir' : 'Fotoğraf yükle' }}
+            </button>
+            @if (member.photo) {
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="photoBusyId() === member.id" (click)="removePhoto(member)">
+                Kaldır
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="stack member-fields">
+          <div class="item-head">
+            <span class="item-index">{{ $index + 1 }}</span>
+            @if (!member.isVisible) {
+              <span class="badge">Gizli</span>
+            }
+            @if (isDirty(member)) {
+              <span class="badge badge-warning">Kaydedilmedi</span>
+            }
+            <div class="item-tools">
+              <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
+                <ygt-icon name="arrow-up" />
+              </button>
+              <button type="button" class="btn btn-ghost btn-icon" aria-label="Aşağı taşı" [disabled]="$last || busyId() !== null" (click)="move($index, 1)">
+                <ygt-icon name="arrow-down" />
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost btn-icon btn-icon-danger"
+                aria-label="Kişiyi sil"
+                [disabled]="busyId() === member.id"
+                (click)="remove(member, member.name + ' ekipten silinsin mi? Fotoğrafı da silinir.')"
+              >
+                <ygt-icon name="trash" />
+              </button>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label [for]="member.id + '-name'">Ad soyad</label>
+              <input [id]="member.id + '-name'" class="input" name="name" maxlength="100" [(ngModel)]="member.name" />
+            </div>
+            <div class="field">
+              <label [for]="member.id + '-role'">Görev</label>
+              <input [id]="member.id + '-role'" class="input" name="role" maxlength="100" [(ngModel)]="member.role" />
+            </div>
+          </div>
+
+          <div class="item-foot">
+            <label class="checkbox">
+              <input type="checkbox" name="isVisible" [(ngModel)]="member.isVisible" />
+              <span>Sitede göster</span>
+            </label>
+            <button
+            type="submit"
+            class="btn btn-sm"
+            [class.btn-primary]="isDirty(member)"
+            [class.btn-outline]="!isDirty(member)"
+            [disabled]="!isDirty(member) || busyId() === member.id"
+          >
+              <ygt-icon name="check" />
+              Kaydet
+            </button>
+          </div>
+        </div>
+      </form>
+    } @empty {
+      <div class="card empty">Henüz ekip üyesi yok. Aşağıdan ekleyebilirsiniz.</div>
+    }
+  </div>
+
+  <form class="card item-card new-item" (ngSubmit)="add()" novalidate>
+    <h2 class="card-title"><ygt-icon name="plus" /> Yeni ekip üyesi</h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="new-name">Ad soyad</label>
+        <input id="new-name" class="input" name="name" maxlength="100" [(ngModel)]="newMember.name" />
+      </div>
+      <div class="field">
+        <label for="new-role">Görev</label>
+        <input id="new-role" class="input" name="role" maxlength="100" placeholder="ör. Yönetim Kurulu Üyesi" [(ngModel)]="newMember.role" />
+      </div>
+    </div>
+    <div class="item-foot">
+      <span class="muted small">Kişi listenin sonuna eklenir; fotoğrafı ekledikten sonra yükleyebilirsiniz.</span>
+      <button type="submit" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Ekleniyor...' : 'Kişiyi ekle' }}</button>
+    </div>
+  </form>
+}

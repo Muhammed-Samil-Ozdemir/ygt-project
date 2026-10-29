@@ -1,24 +1,24 @@
 <div class="container page">
   <div class="card form-card form-card-wide">
     @if (sent()) {
-      <div class="stack result">
-        <h1>Başvurunuz alındı</h1>
-        <p>Teşekkür ederiz. Gelişmeleri sosyal medya hesaplarımızdan duyuracağız.</p>
-        <a class="btn btn-primary" routerLink="/">Ana sayfaya dön</a>
-      </div>
+      <app-application-sent />
     } @else if (closedMessage(); as message) {
-      <div class="stack result">
+      <div class="result">
+        <span class="result-icon"><ygt-icon name="users" /></span>
         <h1>Hackathon başvurusu</h1>
         <p class="muted">{{ message }}</p>
         <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
       </div>
     } @else if (form(); as form) {
-      <div class="stack">
+      <div class="form-head">
+        <span class="form-head-icon"><ygt-icon name="users" /></span>
         <h1>{{ form.title }}</h1>
         @if (form.content) {
           <p class="muted pre-line">{{ form.content }}</p>
         }
-        <p class="notice small">Takımlar 2 ya da 3 kişiden oluşur. Üyelerin e-posta adresleri .edu uzantılı okul e-postası olmalıdır.</p>
+        <p class="notice small">
+          Takımlar 2 ya da 3 kişiden oluşur. Üyelerin e-posta adresleri .edu uzantılı okul e-postası olmalıdır.
+        </p>
       </div>
 
       <form class="stack" (ngSubmit)="submit()" novalidate>
@@ -31,6 +31,7 @@
           @let fields = model[member.key];
           <fieldset class="member-fieldset">
             <legend>
+              <span class="member-number">{{ $index + 1 }}</span>
               {{ member.title }}
               @if (member.optional) {
                 <span class="optional">(isteğe bağlı)</span>
@@ -72,8 +73,12 @@
 
         <div class="stack kvkk">
           <details>
-            <summary>Aydınlatma metnini oku</summary>
-            <p class="kvkk-text small pre-line">{{ kvkkText }}</p>
+            <summary><ygt-icon name="shield" /> Aydınlatma metnini oku</summary>
+            @if (kvkkText(); as text) {
+              <p class="kvkk-text small pre-line">{{ text }}</p>
+            } @else {
+              <p class="kvkk-text loading small">Yükleniyor...</p>
+            }
           </details>
           <label class="checkbox">
             <input type="checkbox" name="kvkkApproved" [(ngModel)]="kvkkApproved" />
@@ -81,12 +86,12 @@
           </label>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="sending()">
+        <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="sending()">
           {{ sending() ? 'Gönderiliyor...' : 'Takımı kaydet' }}
         </button>
       </form>
     } @else {
-      <p class="muted">Yükleniyor...</p>
+      <p class="loading">Yükleniyor...</p>
     }
   </div>
 </div>

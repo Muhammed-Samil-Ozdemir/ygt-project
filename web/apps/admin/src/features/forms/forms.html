@@ -3,12 +3,15 @@
     <h1>Etkinlik formları</h1>
     <p class="muted">Aynı anda tek form başvurulara açık olabilir.</p>
   </div>
-  <a class="btn btn-primary" routerLink="new">Yeni form</a>
+  <a class="btn btn-primary" routerLink="new">
+    <ygt-icon name="plus" />
+    Yeni form
+  </a>
 </div>
 
 @let formList = forms();
 @if (formList === null) {
-  <p class="muted">Yükleniyor...</p>
+  <p class="loading">Yükleniyor...</p>
 } @else if (formList.length === 0) {
   <div class="card empty">Henüz form yok.</div>
 } @else {

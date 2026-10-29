@@ -8,10 +8,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Course, CourseApplicationCommand, HttpService, ToastService } from '@ygt/libraries';
+import { Course, CourseApplicationCommand, HttpService, Icon, ToastService } from '@ygt/libraries';
+import { ApplicationSent } from '../../components/application-sent';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [ApplicationSent, FormsModule, Icon, RouterLink],
   templateUrl: './course-application.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

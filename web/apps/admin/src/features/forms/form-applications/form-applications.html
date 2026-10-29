@@ -11,15 +11,22 @@
     <p class="muted">{{ currentForm?.type === 'hackathon' ? 'Takım başvuruları' : 'Başvurular' }}</p>
   </div>
   @if (count > 0) {
-    <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
-      {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
-    </button>
+    <div class="row">
+      <button type="button" class="btn btn-outline" [disabled]="downloading()" (click)="export()">
+        <ygt-icon name="download" />
+        {{ downloading() ? 'Hazırlanıyor...' : "Excel'e aktar" }}
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="deletingAll()" (click)="removeAll()">
+        <ygt-icon name="trash" />
+        {{ deletingAll() ? 'Siliniyor...' : 'Tümünü sil' }}
+      </button>
+    </div>
   }
 </div>
 
 @if (teamList) {
   @if (teamList.length === 0) {
-    <div class="card empty">Bu forma henüz takım başvurusu yapılmadı.</div>
+    <div class="card empty">Bu forma ait takım başvurusu yok.</div>
   } @else {
     <p class="muted small list-count">{{ teamList.length }} takım</p>
     <div class="table-wrap">
@@ -29,6 +36,7 @@
             <th>Takım</th>
             <th>Üyeler</th>
             <th>Başvuru tarihi</th>
+            <th><span class="visually-hidden">İşlemler</span></th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +56,19 @@
                 </ul>
               </td>
               <td class="nowrap">{{ team.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+              <td>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-icon btn-icon-danger"
+                    aria-label="Takım başvurusunu sil"
+                    [disabled]="deletingId() === team.id"
+                    (click)="removeTeam(team)"
+                  >
+                    <ygt-icon name="trash" />
+                  </button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -56,7 +77,7 @@
   }
 } @else if (list) {
   @if (list.length === 0) {
-    <div class="card empty">Bu forma henüz başvuru yapılmadı.</div>
+    <div class="card empty">Bu forma ait başvuru yok.</div>
   } @else {
     <p class="muted small list-count">{{ list.length }} başvuru</p>
     <div class="table-wrap">
@@ -67,15 +88,29 @@
             <th>Telefon</th>
             <th>E-posta</th>
             <th>Başvuru tarihi</th>
+            <th><span class="visually-hidden">İşlemler</span></th>
           </tr>
         </thead>
         <tbody>
           @for (application of list; track application.id) {
             <tr>
-              <td>{{ application.firstName }} {{ application.lastName }}</td>
+              <td><strong>{{ application.firstName }} {{ application.lastName }}</strong></td>
               <td class="nowrap">{{ application.phoneNumber | phone }}</td>
               <td>{{ application.email }}</td>
               <td class="nowrap">{{ application.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+              <td>
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-icon btn-icon-danger"
+                    aria-label="Başvuruyu sil"
+                    [disabled]="deletingId() === application.id"
+                    (click)="remove(application)"
+                  >
+                    <ygt-icon name="trash" />
+                  </button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -83,5 +118,5 @@
     </div>
   }
 } @else {
-  <p class="muted">Yükleniyor...</p>
+  <p class="loading">Yükleniyor...</p>
 }

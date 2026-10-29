@@ -4,7 +4,7 @@
 
 <div class="card editor-card">
   @if (!loaded()) {
-    <p class="muted">Yükleniyor...</p>
+    <p class="loading">Yükleniyor...</p>
   } @else {
     <form class="stack" (ngSubmit)="save()" novalidate>
       <div class="field">

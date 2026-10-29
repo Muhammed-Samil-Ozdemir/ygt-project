@@ -8,15 +8,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import {
-  errorMessage,
-  Form,
-  FormApplicationCommand,
-  HttpService,
-} from '@ygt/libraries';
+import { errorMessage, Form, FormApplicationCommand, HttpService, Icon } from '@ygt/libraries';
+import { ApplicationSent } from '../../components/application-sent';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [ApplicationSent, FormsModule, Icon, RouterLink],
   templateUrl: './form-application.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

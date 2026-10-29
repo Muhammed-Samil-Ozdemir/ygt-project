@@ -28,6 +28,10 @@ export const appRoutes: Route[] = [
         path: 'certificates',
         loadChildren: () => import('./features/certificates/router'),
       },
+      {
+        path: 'content',
+        loadChildren: () => import('./features/content/router'),
+      },
     ],
   },
   {

@@ -3,12 +3,15 @@
     <h1>Sertifikalar</h1>
     <p class="muted">Her sertifikanın bir doğrulama linki var; linki sertifikanın üzerine yazabilir ya da QR koda çevirebilirsiniz.</p>
   </div>
-  <a class="btn btn-primary" routerLink="new">Yeni sertifika</a>
+  <a class="btn btn-primary" routerLink="new">
+    <ygt-icon name="plus" />
+    Yeni sertifika
+  </a>
 </div>
 
 @let list = certificates();
 @if (list === null) {
-  <p class="muted">Yükleniyor...</p>
+  <p class="loading">Yükleniyor...</p>
 } @else if (list.length === 0) {
   <div class="card empty">Henüz sertifika yok.</div>
 } @else {

@@ -7,6 +7,12 @@ export interface TimeLeft {
   seconds: number;
 }
 
+export interface TimePart {
+  /** İki haneli: "05". */
+  value: string;
+  unit: string;
+}
+
 /** Bitiş anına kalan süre. Süre dolmuşsa null. */
 export function timeLeft(endsAt: string, now: number): TimeLeft | null {
   const totalSeconds = Math.floor((new Date(endsAt).getTime() - now) / 1000);
@@ -20,6 +26,18 @@ export function timeLeft(endsAt: string, now: number): TimeLeft | null {
     minutes: Math.floor((totalSeconds % 3600) / 60),
     seconds: totalSeconds % 60,
   };
+}
+
+/** Kalan süreyi ekranda kutular halinde göstermek için: gün, saat, dakika, saniye. */
+export function timeParts(left: TimeLeft): TimePart[] {
+  const pad = (value: number) => value.toString().padStart(2, '0');
+
+  return [
+    { value: pad(left.days), unit: 'gün' },
+    { value: pad(left.hours), unit: 'saat' },
+    { value: pad(left.minutes), unit: 'dakika' },
+    { value: pad(left.seconds), unit: 'saniye' },
+  ];
 }
 
 /** Saniyede bir güncellenen "şu an". Bileşenin alan tanımında çağrılmalı; bileşen kapanınca durur. */
