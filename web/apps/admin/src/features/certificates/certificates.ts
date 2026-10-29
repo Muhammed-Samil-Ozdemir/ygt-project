@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CertificateListItem, HttpService, Icon, ToastService } from '@ygt/libraries';
+import { CertificateListItem, HttpService, Icon, MessageResponse, ToastService } from '@ygt/libraries';
 
 @Component({
   imports: [DatePipe, Icon, RouterLink],
@@ -23,9 +23,61 @@ export default class Certificates implements OnInit {
   protected readonly certificates = signal<CertificateListItem[] | null>(null);
   /** Görseli yüklenmekte olan sertifikanın ID'si. */
   protected readonly uploadingId = signal<string | null>(null);
+  protected readonly importing = signal(false);
+  protected readonly exporting = signal(false);
 
   ngOnInit() {
     this.#load();
+  }
+
+  protected downloadTemplate() {
+    this.#http.download('/api/certificates/import/template');
+  }
+
+  /** Excel'deki satırları toplu ekler. Hatalı satır varsa API hiçbirini eklemez ve satır numaralarını söyler. */
+  protected importFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.importing.set(true);
+    this.#http.upload<MessageResponse>(
+      '/api/certificates/import',
+      file,
+      (res) => {
+        this.importing.set(false);
+        this.#toast.success(res.message);
+        this.#load();
+      },
+      () => this.importing.set(false),
+      'post',
+    );
+  }
+
+  /** Bütün sertifikaları doğrulama linkleriyle Excel'e aktarır; linkler bu panelin adresiyle başlar. */
+  protected exportLinks() {
+    this.exporting.set(true);
+    this.#http.download(
+      `/api/certificates/export?siteUrl=${encodeURIComponent(location.origin)}`,
+      () => this.exporting.set(false),
+      () => this.exporting.set(false),
+    );
+  }
+
+  /** Doğrulama linkinin QR kodunu PNG olarak indirir. Kütüphane sadece gerektiğinde yüklenir. */
+  protected async downloadQr(certificate: CertificateListItem) {
+    // qrcode CommonJS paketi; derlenmiş kodda fonksiyonları "default" altında gelir.
+    const qrcode = await import('qrcode');
+    const { toDataURL } = (qrcode as unknown as { default?: typeof qrcode }).default ?? qrcode;
+    const dataUrl = await toDataURL(this.verifyUrl(certificate), { width: 600, margin: 2 });
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `qr-${certificate.firstName}-${certificate.lastName}.png`.replace(/\s+/g, '-');
+    link.click();
   }
 
   /** Sertifikanın üzerine basılacak / QR koda çevrilecek doğrulama linki. */

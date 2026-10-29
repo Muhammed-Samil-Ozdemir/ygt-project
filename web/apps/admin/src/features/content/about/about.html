@@ -9,7 +9,7 @@
 
   <div class="item-list">
     @for (card of list; track card.id) {
-      <form class="card item-card" [class.is-hidden]="!card.isVisible" (ngSubmit)="save(card)" novalidate>
+      <form class="card item-card drag-item" [class.is-hidden]="!card.isVisible" [class.is-dragging]="dragIndex() === $index" [class.is-drop-target]="dropIndex() === $index && dragIndex() !== $index" (dragover)="dragOver($index, $event)" (drop)="drop($index, $event)" (ngSubmit)="save(card)" novalidate>
         <div class="item-head">
           <span class="item-index">{{ $index + 1 }}</span>
           <strong class="item-title">{{ card.title || 'Başlıksız kart' }}</strong>
@@ -20,6 +20,9 @@
             <span class="badge badge-warning">Kaydedilmedi</span>
           }
           <div class="item-tools">
+            <span class="drag-handle" draggable="true" title="Sürükleyerek taşı" aria-hidden="true" (dragstart)="dragStart($index, $event)" (dragend)="endDrag()">
+              <ygt-icon name="grip" />
+            </span>
             <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
               <ygt-icon name="arrow-up" />
             </button>

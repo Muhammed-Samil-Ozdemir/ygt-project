@@ -1,0 +1,63 @@
+<div class="page-header">
+  <div>
+    <h1>Yöneticiler</h1>
+    <p class="muted">Panele giriş yapabilen kişiler. Bütün yöneticilerin yetkisi aynıdır.</p>
+  </div>
+  <a class="btn btn-primary" routerLink="new">
+    <ygt-icon name="user-plus" />
+    Yeni yönetici
+  </a>
+</div>
+
+@let list = users();
+@if (list === null) {
+  <p class="loading">Yükleniyor...</p>
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Ad soyad</th>
+          <th>E-posta</th>
+          <th>Eklenme</th>
+          <th><span class="visually-hidden">İşlemler</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of list; track user.id) {
+          <tr>
+            <td>
+              <strong>{{ user.name }}</strong>
+              @if (user.isCurrent) {
+                <span class="badge badge-primary">Siz</span>
+              }
+            </td>
+            <td>{{ user.email }}</td>
+            <td class="nowrap">{{ user.createdAt | date: 'dd.MM.yyyy' }}</td>
+            <td>
+              <div class="actions">
+                @if (user.isCurrent) {
+                  <a class="btn btn-outline btn-sm" routerLink="/account">Şifremi değiştir</a>
+                } @else {
+                  <a class="btn btn-outline btn-sm" [routerLink]="[user.id, 'password']">Şifre belirle</a>
+                }
+                <a class="btn btn-ghost btn-sm" [routerLink]="[user.id, 'edit']">Düzenle</a>
+                @if (!user.isCurrent) {
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-icon btn-icon-danger"
+                    aria-label="Yöneticiyi sil"
+                    [disabled]="deletingId() === user.id"
+                    (click)="remove(user)"
+                  >
+                    <ygt-icon name="trash" />
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

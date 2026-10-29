@@ -848,3 +848,56 @@ a.stat:hover {
     margin-top: 0;
   }
 }
+
+/* Sertifikalar: Excel'den toplu ekleme kutusu */
+
+.import-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.import-text {
+  gap: 4px;
+  max-width: 640px;
+}
+
+/* Site içeriği: sürükle-bırak sıralama */
+
+.drag-handle {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  cursor: grab;
+}
+
+.drag-handle:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-item.is-dragging {
+  opacity: 0.45;
+}
+
+.drag-item.is-drop-target {
+  outline: 2px dashed var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* Dokunmatik ekranda sürükle-bırak çalışmaz; orada sıralama oklarla yapılır. */
+@media (hover: none) {
+  .drag-handle {
+    display: none;
+  }
+}

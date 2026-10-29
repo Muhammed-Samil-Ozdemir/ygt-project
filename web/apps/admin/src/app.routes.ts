@@ -32,6 +32,14 @@ export const appRoutes: Route[] = [
         path: 'content',
         loadChildren: () => import('./features/content/router'),
       },
+      {
+        path: 'users',
+        loadChildren: () => import('./features/users/router'),
+      },
+      {
+        path: 'account',
+        loadComponent: () => import('./features/account/account'),
+      },
     ],
   },
   {

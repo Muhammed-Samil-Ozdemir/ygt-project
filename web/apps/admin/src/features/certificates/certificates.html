@@ -3,11 +3,40 @@
     <h1>Sertifikalar</h1>
     <p class="muted">Her sertifikanın bir doğrulama linki var; linki sertifikanın üzerine yazabilir ya da QR koda çevirebilirsiniz.</p>
   </div>
-  <a class="btn btn-primary" routerLink="new">
-    <ygt-icon name="plus" />
-    Yeni sertifika
-  </a>
+  <div class="row">
+    @if (certificates()?.length) {
+      <button type="button" class="btn btn-outline" [disabled]="exporting()" (click)="exportLinks()">
+        <ygt-icon name="download" />
+        {{ exporting() ? 'Hazırlanıyor...' : "Linkleri Excel'e aktar" }}
+      </button>
+    }
+    <a class="btn btn-primary" routerLink="new">
+      <ygt-icon name="plus" />
+      Yeni sertifika
+    </a>
+  </div>
 </div>
+
+<section class="card import-card">
+  <div class="stack import-text">
+    <h2 class="card-title">Excel'den toplu ekle</h2>
+    <p class="muted small">
+      Şablonu indirin, her satıra bir kişi yazın (eğitim adı, ad ve soyad zorunlu; e-posta ve telefon isteğe bağlı) ve
+      dosyayı yükleyin. Hatalı satır varsa hiçbiri eklenmez, hangi satırda sorun olduğu yazılır.
+    </p>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn-ghost btn-sm" (click)="downloadTemplate()">
+      <ygt-icon name="download" />
+      Şablonu indir
+    </button>
+    <input #importInput type="file" accept=".xlsx" hidden (change)="importFile($event)" />
+    <button type="button" class="btn btn-outline btn-sm" [disabled]="importing()" (click)="importInput.click()">
+      <ygt-icon name="plus" />
+      {{ importing() ? 'Ekleniyor...' : 'Excel dosyası yükle' }}
+    </button>
+  </div>
+</section>
 
 @let list = certificates();
 @if (list === null) {
@@ -42,6 +71,7 @@
             <td>
               <div class="actions">
                 <button type="button" class="btn btn-outline btn-sm" (click)="copyLink(certificate)">Linki kopyala</button>
+                <button type="button" class="btn btn-ghost btn-sm" (click)="downloadQr(certificate)">QR kod</button>
                 <a class="btn btn-ghost btn-sm" [href]="verifyUrl(certificate)" target="_blank" rel="noopener">Görüntüle</a>
                 <input
                   #fileInput

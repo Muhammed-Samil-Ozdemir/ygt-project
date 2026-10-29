@@ -8,7 +8,7 @@
 
   <div class="row-list">
     @for (link of list; track link.id) {
-      <form class="list-row link-row" [class.is-hidden]="!link.isVisible" (ngSubmit)="save(link)" novalidate>
+      <form class="list-row link-row drag-item" [class.is-hidden]="!link.isVisible" [class.is-dragging]="dragIndex() === $index" [class.is-drop-target]="dropIndex() === $index && dragIndex() !== $index" (dragover)="dragOver($index, $event)" (drop)="drop($index, $event)" (ngSubmit)="save(link)" novalidate>
         <span class="item-index">{{ $index + 1 }}</span>
         <div class="field">
           <label [for]="link.id + '-label'" class="small">Ad</label>
@@ -29,6 +29,9 @@
           <a class="btn btn-ghost btn-icon" [href]="link.url" target="_blank" rel="noopener" aria-label="Bağlantıyı aç">
             <ygt-icon name="external" />
           </a>
+          <span class="drag-handle" draggable="true" title="Sürükleyerek taşı" aria-hidden="true" (dragstart)="dragStart($index, $event)" (dragend)="endDrag()">
+            <ygt-icon name="grip" />
+          </span>
           <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
             <ygt-icon name="arrow-up" />
           </button>

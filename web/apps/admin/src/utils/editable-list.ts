@@ -20,6 +20,9 @@ export abstract class EditableList<TItem extends { id: string }, TCommand> imple
   /** Görseli yüklenen ya da kaldırılan kaydın ID'si. */
   protected readonly imageBusyId = signal<string | null>(null);
   protected readonly adding = signal(false);
+  /** Sürüklenen kaydın sırası ve üzerine gelinen sıra (bırakılacak yeri göstermek için). */
+  protected readonly dragIndex = signal<number | null>(null);
+  protected readonly dropIndex = signal<number | null>(null);
 
   /** API adresi, ör. "/api/site/content/about". */
   protected abstract readonly endpoint: string;
@@ -87,18 +90,67 @@ export abstract class EditableList<TItem extends { id: string }, TCommand> imple
     );
   }
 
-  /** Kaydı bir yukarı (-1) ya da aşağı (+1) taşır. */
+  /** Kaydı bir yukarı (-1) ya da aşağı (+1) taşır. Klavyeyle ve dokunmatik ekranda sıralama bununla yapılır. */
   protected move(index: number, direction: -1 | 1) {
-    const items = [...(this.items() ?? [])];
-    const target = index + direction;
-    if (target < 0 || target >= items.length) {
+    this.#reorder(index, index + direction);
+  }
+
+  /**
+   * Sürükle-bırak: sürükleme kaydın tutamacından başlar (".drag-handle"), kaydın kutusu (".drag-item")
+   * bırakma alanıdır. Kutunun tamamı sürüklenebilir olsaydı içindeki metin kutularında yazı seçilemezdi.
+   */
+  protected dragStart(index: number, event: DragEvent) {
+    if (this.busyId() !== null || !event.dataTransfer) {
+      event.preventDefault();
       return;
     }
 
-    [items[index], items[target]] = [items[target], items[index]];
+    // Sürüklerken sadece tutamaç değil, kaydın tamamı görünsün.
+    const item = (event.target as HTMLElement).closest<HTMLElement>('.drag-item');
+    if (item) {
+      event.dataTransfer.setDragImage(item, 24, 24);
+    }
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', '');
+    this.dragIndex.set(index);
+  }
+
+  protected dragOver(index: number, event: DragEvent) {
+    if (this.dragIndex() === null) {
+      return;
+    }
+
+    event.preventDefault();
+    this.dropIndex.set(index);
+  }
+
+  protected drop(index: number, event: DragEvent) {
+    event.preventDefault();
+    const from = this.dragIndex();
+    this.endDrag();
+
+    if (from !== null) {
+      this.#reorder(from, index);
+    }
+  }
+
+  protected endDrag() {
+    this.dragIndex.set(null);
+    this.dropIndex.set(null);
+  }
+
+  /** Kaydı from sırasından to sırasına taşır ve yeni sırayı kaydeder. */
+  #reorder(from: number, to: number) {
+    const items = [...(this.items() ?? [])];
+    if (from === to || to < 0 || to >= items.length) {
+      return;
+    }
+
+    const [moved] = items.splice(from, 1);
+    items.splice(to, 0, moved);
     const order: OrderCommand = { ids: items.map((item) => item.id) };
 
-    this.busyId.set(items[target].id);
+    this.busyId.set(moved.id);
     this.#http.put(
       `${this.endpoint}/order`,
       order,

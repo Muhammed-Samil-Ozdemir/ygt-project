@@ -8,6 +8,7 @@ export * from './lib/models/content.model';
 export * from './lib/models/course.model';
 export * from './lib/models/form.model';
 export * from './lib/models/site.model';
+export * from './lib/models/user.model';
 export * from './lib/pipes/phone';
 export * from './lib/services/error';
 export * from './lib/services/http';

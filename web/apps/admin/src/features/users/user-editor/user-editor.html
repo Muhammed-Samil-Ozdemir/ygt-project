@@ -1,0 +1,60 @@
+<a class="back-link small" routerLink="/users">Yöneticiler</a>
+
+<div class="page-header">
+  <h1>{{ id() ? 'Yöneticiyi düzenle' : 'Yeni yönetici' }}</h1>
+</div>
+
+<div class="card editor-card">
+  @if (!loaded()) {
+    <p class="loading">Yükleniyor...</p>
+  } @else {
+    <form class="stack" (ngSubmit)="save()" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label for="name">Ad soyad</label>
+          <input id="name" class="input" name="name" autocomplete="off" [(ngModel)]="model.name" />
+        </div>
+        <div class="field">
+          <label for="email">E-posta</label>
+          <input id="email" class="input" type="email" name="email" autocomplete="off" [(ngModel)]="model.email" />
+          <p class="hint">Panele bu adresle giriş yapılır.</p>
+        </div>
+      </div>
+
+      @if (!id()) {
+        <div class="field-row">
+          <div class="field">
+            <label for="password">Şifre</label>
+            <input
+              id="password"
+              class="input"
+              type="password"
+              name="password"
+              autocomplete="new-password"
+              [(ngModel)]="model.password"
+            />
+            <p class="hint">En az 8 karakter. Kişiye güvenli bir yoldan iletin, ilk girişte değiştirmesini isteyin.</p>
+          </div>
+          <div class="field">
+            <label for="passwordRepeat">Şifre (tekrar)</label>
+            <input
+              id="passwordRepeat"
+              class="input"
+              type="password"
+              name="passwordRepeat"
+              autocomplete="new-password"
+              [(ngModel)]="passwordRepeat"
+            />
+          </div>
+        </div>
+      }
+
+      <div class="row">
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+        <a class="btn btn-ghost" routerLink="/users">Vazgeç</a>
+      </div>
+    </form>
+  }
+</div>

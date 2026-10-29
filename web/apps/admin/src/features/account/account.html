@@ -1,0 +1,58 @@
+<div class="page-header">
+  <div>
+    <h1>Hesabım</h1>
+    @if (user(); as user) {
+      <p class="muted">{{ user.name }} ({{ user.email }})</p>
+    }
+  </div>
+</div>
+
+<section class="card editor-card">
+  <form class="stack" (ngSubmit)="changePassword()" novalidate>
+    <h2 class="card-title">Şifre değiştir</h2>
+
+    <div class="field">
+      <label for="currentPassword">Mevcut şifre</label>
+      <input
+        id="currentPassword"
+        class="input"
+        type="password"
+        name="currentPassword"
+        autocomplete="current-password"
+        [(ngModel)]="model.currentPassword"
+      />
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="newPassword">Yeni şifre</label>
+        <input
+          id="newPassword"
+          class="input"
+          type="password"
+          name="newPassword"
+          autocomplete="new-password"
+          [(ngModel)]="model.newPassword"
+        />
+        <p class="hint">En az 8 karakter.</p>
+      </div>
+      <div class="field">
+        <label for="passwordRepeat">Yeni şifre (tekrar)</label>
+        <input
+          id="passwordRepeat"
+          class="input"
+          type="password"
+          name="passwordRepeat"
+          autocomplete="new-password"
+          [(ngModel)]="passwordRepeat"
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Kaydediliyor...' : 'Şifreyi değiştir' }}
+      </button>
+    </div>
+  </form>
+</section>

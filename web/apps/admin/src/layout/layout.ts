@@ -20,6 +20,7 @@ export default class Layout {
     { link: '/forms', label: 'Formlar', icon: 'clipboard', exact: false },
     { link: '/certificates', label: 'Sertifikalar', icon: 'award', exact: false },
     { link: '/content', label: 'Site içeriği', icon: 'layout', exact: false },
+    { link: '/users', label: 'Yöneticiler', icon: 'users', exact: false },
   ];
 
   /** Dar ekranda menü üstte kapalı durur, butonla açılır. */

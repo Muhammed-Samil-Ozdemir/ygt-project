@@ -9,7 +9,7 @@
 
   <div class="team-editor">
     @for (member of list; track member.id) {
-      <form class="card member-card" [class.is-hidden]="!member.isVisible" (ngSubmit)="save(member)" novalidate>
+      <form class="card member-card drag-item" [class.is-hidden]="!member.isVisible" [class.is-dragging]="dragIndex() === $index" [class.is-drop-target]="dropIndex() === $index && dragIndex() !== $index" (dragover)="dragOver($index, $event)" (drop)="drop($index, $event)" (ngSubmit)="save(member)" novalidate>
         <app-image-field
           [src]="member.photo ? imageUrl(member.photo) : null"
           [alt]="member.name"
@@ -28,6 +28,9 @@
               <span class="badge badge-warning">Kaydedilmedi</span>
             }
             <div class="item-tools">
+              <span class="drag-handle" draggable="true" title="Sürükleyerek taşı" aria-hidden="true" (dragstart)="dragStart($index, $event)" (dragend)="endDrag()">
+                <ygt-icon name="grip" />
+              </span>
               <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
                 <ygt-icon name="arrow-up" />
               </button>

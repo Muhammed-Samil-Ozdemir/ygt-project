@@ -15,7 +15,7 @@
 
   <div class="row-list">
     @for (technology of list; track technology.id) {
-      <form class="list-row" (ngSubmit)="save(technology)" novalidate>
+      <form class="list-row drag-item" (ngSubmit)="save(technology)" [class.is-dragging]="dragIndex() === $index" [class.is-drop-target]="dropIndex() === $index && dragIndex() !== $index" (dragover)="dragOver($index, $event)" (drop)="drop($index, $event)" novalidate>
         <span class="item-index">{{ $index + 1 }}</span>
         <label [for]="technology.id" class="visually-hidden">Teknoloji adı</label>
         <input [id]="technology.id" class="input" name="name" maxlength="50" [(ngModel)]="technology.name" />
@@ -23,6 +23,9 @@
           @if (isDirty(technology)) {
             <button type="submit" class="btn btn-primary btn-sm" [disabled]="busyId() === technology.id">Kaydet</button>
           }
+          <span class="drag-handle" draggable="true" title="Sürükleyerek taşı" aria-hidden="true" (dragstart)="dragStart($index, $event)" (dragend)="endDrag()">
+            <ygt-icon name="grip" />
+          </span>
           <button type="button" class="btn btn-ghost btn-icon" aria-label="Yukarı taşı" [disabled]="$first || busyId() !== null" (click)="move($index, -1)">
             <ygt-icon name="arrow-up" />
           </button>
