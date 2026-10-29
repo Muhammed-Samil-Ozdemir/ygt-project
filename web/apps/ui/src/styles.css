@@ -627,6 +627,141 @@
   color: var(--color-primary-hover);
 }
 
+/* Ana sayfa: resmi üyelik */
+
+/* Ekip bölümünün hemen altındaysa fotoğrafların devamı gibi aynı zeminde durur. */
+#team + .membership-section {
+  margin-top: -40px;
+  padding-top: 0;
+  background: var(--color-surface);
+}
+
+.membership-card {
+  display: flex;
+  align-items: center;
+  gap: 20px 28px;
+  padding: 28px 32px;
+  border: 1px solid #f3d3cb;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, #ffffff 0%, #fff3ee 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.membership-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 1.6rem;
+}
+
+.membership-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.membership-text h2 {
+  font-size: 1.35rem;
+}
+
+.membership-text p {
+  margin-top: 6px;
+}
+
+.membership-card .btn {
+  flex: none;
+}
+
+@media (max-width: 760px) {
+  .membership-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+}
+
+/* Ana sayfa: oyunlar */
+
+.games-card {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, #191c25 0%, #2b1a16 100%);
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s var(--ease);
+}
+
+.games-card:hover {
+  text-decoration: none;
+  transform: translateY(-3px);
+}
+
+/* Görsel yüklenmediyse ızgara zemin üstünde oyun kolu simgesi */
+.games-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(239, 65, 38, 0.35), transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) 0 0 / 24px 24px;
+  color: var(--color-brand-light);
+  font-size: 5rem;
+}
+
+.games-visual img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.games-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 22px;
+  padding: 40px;
+}
+
+.games-text p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.05rem;
+}
+
+.games-button {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.games-card:hover .games-button {
+  background: var(--color-primary-hover);
+}
+
+@media (max-width: 760px) {
+  .games-card {
+    grid-template-columns: 1fr;
+  }
+
+  .games-visual {
+    min-height: 180px;
+    font-size: 4rem;
+  }
+
+  .games-text {
+    padding: 24px;
+  }
+}
+
 /* Alt bilgi */
 
 .site-footer {

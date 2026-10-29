@@ -25,6 +25,16 @@ export interface SiteTexts {
   joinButton: string;
   joinTitle: string;
   joinText: string;
+  membershipUrl: string;
+  membershipTitle: string;
+  membershipText: string;
+  membershipButton: string;
+  gamesUrl: string;
+  gamesTitle: string;
+  gamesText: string;
+  gamesButton: string;
+  /** Görsel */
+  gamesImage: string;
   footerText: string;
   universityName: string;
   universityUrl: string;

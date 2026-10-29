@@ -133,6 +133,53 @@
     </section>
   }
 
+  <!-- Resmi üyelik: ekip fotoğraflarının hemen altında, aynı zeminde. -->
+  @if (site.texts.membershipUrl) {
+    <section class="section membership-section">
+      <div class="container">
+        <div class="membership-card">
+          <span class="membership-icon" aria-hidden="true"><ygt-icon name="user-plus" /></span>
+          <div class="membership-text">
+            <h2>{{ site.texts.membershipTitle }}</h2>
+            @if (site.texts.membershipText) {
+              <p class="muted pre-line">{{ site.texts.membershipText }}</p>
+            }
+          </div>
+          <a class="btn btn-primary btn-lg" [href]="site.texts.membershipUrl" target="_blank" rel="noopener">
+            {{ site.texts.membershipButton }}
+            <ygt-icon name="external" />
+          </a>
+        </div>
+      </div>
+    </section>
+  }
+
+  @if (site.texts.gamesUrl) {
+    <section id="games" class="section">
+      <div class="container">
+        <h2 class="section-title">{{ site.texts.gamesTitle }}</h2>
+        <a class="games-card" [href]="site.texts.gamesUrl" target="_blank" rel="noopener">
+          <div class="games-visual" aria-hidden="true">
+            @if (site.texts.gamesImage; as image) {
+              <img [src]="imageUrl(image)" alt="" loading="lazy" />
+            } @else {
+              <ygt-icon name="gamepad" />
+            }
+          </div>
+          <div class="games-text">
+            @if (site.texts.gamesText) {
+              <p class="pre-line">{{ site.texts.gamesText }}</p>
+            }
+            <span class="btn btn-lg games-button">
+              {{ site.texts.gamesButton }}
+              <ygt-icon name="arrow-right" />
+            </span>
+          </div>
+        </a>
+      </div>
+    </section>
+  }
+
   @if (site.technologies.length) {
     <section class="section">
       <div class="container">

@@ -34,6 +34,9 @@
       @if (texts && content()?.team?.length) {
         <a class="nav-link" routerLink="/" fragment="team" (click)="closeMenu()">{{ texts.teamTitle }}</a>
       }
+      @if (texts?.gamesUrl) {
+        <a class="nav-link" routerLink="/" fragment="games" (click)="closeMenu()">{{ texts.gamesTitle }}</a>
+      }
       @if (application(); as application) {
         <a class="btn btn-outline" [routerLink]="application.link" (click)="closeMenu()">{{ application.label }}</a>
       }
