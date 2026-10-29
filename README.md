@@ -51,8 +51,29 @@ npx nx serve admin            # http://localhost:4201/admin/
 
 Geliştirme sunucusu `/api` isteklerini `proxy.conf.json` ile `localhost:5146`'ya yönlendirir; Docker'daki nginx de aynı yolu kullanır.
 
-API her açılışta bekleyen migration'ları uygular ve başlangıç verilerini ekler: admin kullanıcısı, site ayarları ve ana sayfa ziyaret sayacı.
-Ayardaki admin şifresi değişirse bir sonraki açılışta veritabanındaki şifre de güncellenir.
+API her açılışta bekleyen migration'ları uygular ve gerekli kayıtları ekler: site ayarları, ana sayfa ziyaret sayacı ve ilk kurulumda (hiç yönetici yokken) `.env`'deki bilgilerle ilk yönetici.
+Sonrasında yöneticiler ve şifreler panelden ("Yöneticiler", "Hesabım") yönetilir; `.env`'deki şifreyi değiştirmek mevcut yöneticiyi etkilemez.
+Şifre unutulursa `.env`'de `ADMIN_RESET_PASSWORD=true` yapıp `docker compose up -d` çalıştırılır: `ADMIN_EMAIL` yöneticisinin şifresi `ADMIN_PASSWORD` olur. Giriş yaptıktan sonra ayar `false`'a geri alınmalı.
+
+### Testler
+
+```bash
+cd server
+dotnet test --project Ygt.WebAPI.Tests
+```
+
+Entegrasyon testleri SQL Server'ı Testcontainers ile geçici bir Docker konteynerinde açar; Docker çalışıyor olmalı.
+GitHub'a gönderilen her değişiklikte `.github/workflows/ci.yml` testleri, ön yüz derlemesini ve Docker imajlarını kontrol eder.
+
+### Yedekleme
+
+```bash
+bash scripts/backup.sh                      # ./backups/<tarih> altına veritabanı (.bak) ve görseller
+bash scripts/restore.sh backups/<tarih>     # yedeği geri yükler (mevcut verinin yerine geçer, onay ister)
+```
+
+Sunucuda her gece yedek için `crontab -e` ile: `0 3 * * * cd /opt/ygt-project && bash scripts/backup.sh >> backups/backup.log 2>&1`.
+14 günden eski yedekler silinir (`KEEP_DAYS` ile değişir). Yedekleri ayrıca sunucu dışına da kopyalayın.
 
 Site içeriği boş başlar: logo, sekme simgesi, bütün metinler, hakkımızda kartları, ekip, teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden girilir.
 Boş bırakılan yazı ve görsel sitede gösterilmez. Bölüm başlıkları gibi bazı alanlarda boşken genel bir ifade ("Hakkımızda") yazılır; bunlar `Utilities/SiteTextCatalog.cs`'te `Placeholder` olarak tanımlı.
@@ -101,6 +122,14 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | GET, POST | `/certificates` | Tüm sertifikalar, yeni sertifika (doğrulama kodu otomatik) |
 | PUT, DELETE | `/certificates/{id}` | Düzenle, sil |
 | PUT | `/certificates/{id}/image` | Görsel yükle (`multipart/form-data`, alan adı `file`, PNG/JPG/WEBP, en fazla 5 MB) |
+| GET | `/certificates/import/template` | Toplu ekleme için boş Excel şablonu (Eğitim adı, Ad, Soyad, E-posta, Telefon) |
+| POST | `/certificates/import` | Excel'den toplu ekleme (`multipart/form-data`, alan adı `file`, en fazla 1000 satır). Hatalı satır varsa hiçbiri eklenmez, satır numaralarıyla hata döner |
+| GET | `/certificates/export?siteUrl=...` | Bütün sertifikalar doğrulama linkleriyle Excel olarak; linkler `siteUrl` ile başlar |
+| GET, POST | `/users` | Yöneticiler (`isCurrent`: isteyen kişi), yeni yönetici (`{ name, email, password }`, şifre en az 8 karakter) |
+| PUT, DELETE | `/users/{id}` | Ad ve e-posta / yöneticiyi sil (kişi kendini silemez; silinenin token'ı hemen geçersiz olur) |
+| PUT | `/users/{id}/password` | Başka bir yöneticiye yeni şifre belirle |
+| GET | `/auth/me` | Giriş yapmış yöneticinin bilgileri |
+| PUT | `/auth/password` | Kendi şifresini değiştir (`{ currentPassword, newPassword }`; giriş gibi istek sınırına tabi) |
 | GET, PUT | `/site/content/texts` | Tek parça metinler ve görseller: tanımları (etiket, tür, sınır, boşken yazılan ifade) ve değerleri / `{ values: { anahtar: metin } }` ile metinleri değiştirme |
 | PUT, DELETE | `/site/content/texts/{anahtar}/image` | Görsel alanına (`logo`, `favicon`, `heroImage`) görsel yükle (`certificates/{id}/image` ile aynı kurallar) / kaldır |
 | GET, POST | `/site/content/about`, `/events`, `/team`, `/technologies`, `/links` | İçerik listesi (gizliler dahil), listenin sonuna yeni kayıt |
@@ -121,6 +150,8 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 - İstek sınırı (IP başına, dakikada): 60 başvuru, 5 giriş denemesi. `appsettings.json` > `RateLimiting` ile değiştirilebilir.
 - Başvurular otomatik silinmez. KVKK gereği silinmesi gerekenler panelden tek tek ya da toplu silinir (eğitim ve formun kendisi kalır).
 - Site içeriği düz metindir, HTML olarak yorumlanmaz. Bağlantılar sadece `http(s)` ve `mailto` olabilir.
+- İçerik listeleri panelde sürükle-bırakla ya da oklarla sıralanır (dokunmatik ekranda sadece oklar).
+- Bütün yöneticilerin yetkisi aynıdır. Sertifikanın QR kodu panelde tarayıcıda üretilip PNG olarak indirilir.
 
 ## Veritabanı
 
@@ -175,7 +206,8 @@ server/Ygt.WebAPI/
 web/
   apps/ui/          Site: ana sayfa, eğitim / etkinlik / hackathon başvurusu, geri sayım, sertifika doğrulama.
                     Logo dahil bütün içerik API'den gelir; kodda sadece arayüz yazıları (form etiketleri gibi) var.
-  apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar, site içeriği
+  apps/admin/       Yönetim paneli: giriş, panel ve site ayarları, eğitimler, formlar, sertifikalar, site içeriği,
+                    yöneticiler ve hesabım
   libraries/        Ortak kod: HttpService, hata bildirimleri, token, modeller, simgeler, ortak stiller ve fontlar
   nginx.conf        Docker'da siteyi, paneli ve /api yönlendirmesini sunar
 ```
@@ -190,4 +222,6 @@ Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. E
 - [x] Tek Docker kurulumu: nginx ön yüzü sunar, `/api` isteklerini API'ye yönlendirir
 - [x] Sitenin içeriğini panelden yönetmek
 - [x] KVKK: başvuruları panelden silme
+- [x] Yöneticiler ve şifre değiştirme, sertifikada Excel'den toplu ekleme ve QR kod, sürükle-bırak sıralama
+- [x] Yedekleme betikleri, testler ve CI
 - [ ] Yayına alma ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)
