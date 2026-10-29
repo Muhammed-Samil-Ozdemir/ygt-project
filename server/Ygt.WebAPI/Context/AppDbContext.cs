@@ -17,6 +17,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<VisitorCounter> VisitorCounters => Set<VisitorCounter>();
     public DbSet<SiteText> SiteTexts => Set<SiteText>();
     public DbSet<AboutCard> AboutCards => Set<AboutCard>();
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<EventPhoto> EventPhotos => Set<EventPhoto>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<Technology> Technologies => Set<Technology>();
     public DbSet<SiteLink> SiteLinks => Set<SiteLink>();

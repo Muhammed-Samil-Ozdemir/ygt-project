@@ -24,6 +24,16 @@ public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvi
             .Select(c => new AboutCardDto(c.Title, c.Text, c.ImageFileName))
             .ToListAsync(cancellationToken);
 
+        var events = await dbContext.Events
+            .Where(e => e.IsVisible && e.Photos.Any())
+            .OrderBy(e => e.SortOrder)
+            .Select(e => new EventDto(
+                e.Title,
+                e.Description,
+                e.Style,
+                e.Photos.OrderBy(p => p.SortOrder).Select(p => p.FileName).ToList()))
+            .ToListAsync(cancellationToken);
+
         var team = await dbContext.TeamMembers
             .Where(m => m.IsVisible)
             .OrderBy(m => m.SortOrder)
@@ -41,7 +51,7 @@ public sealed class SiteContentService(AppDbContext dbContext, ImageStorageProvi
             .Select(l => new SiteLinkDto(l.Label, l.Url))
             .ToListAsync(cancellationToken);
 
-        return new SiteContentDto(texts, about, team, technologies, links);
+        return new SiteContentDto(texts, about, events, team, technologies, links);
     }
 
     /// <summary>Sitenin görseli. Klasörde sadece panelden yüklenen, sitede herkese görünen görseller durur.</summary>

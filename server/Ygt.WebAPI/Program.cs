@@ -27,6 +27,7 @@ builder.Services.AddScoped<FormService>();
 builder.Services.AddScoped<CertificateService>();
 builder.Services.AddScoped<SiteContentService>();
 builder.Services.AddScoped<AboutCardService>();
+builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<TeamMemberService>();
 builder.Services.AddScoped<TechnologyService>();
 builder.Services.AddScoped<SiteLinkService>();

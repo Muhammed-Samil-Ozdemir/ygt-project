@@ -136,6 +136,24 @@ public static class SiteTextCatalog
         },
         new()
         {
+            Key = "eventsTitle",
+            Group = Sections,
+            Label = "Etkinlikler",
+            Hint = "Etkinlik panosunun başlığı; üst menüde de bu yazı görünür.",
+            MaxLength = 60,
+            Placeholder = "Etkinliklerimiz"
+        },
+        new()
+        {
+            Key = "recurringEventsTitle",
+            Group = Sections,
+            Label = "Geleneksel etkinlikler",
+            Hint = "\"Geleneksel\" görünümündeki etkinliklerin bölüm başlığı.",
+            MaxLength = 60,
+            Placeholder = "Gelenekselleşmiş etkinliklerimiz"
+        },
+        new()
+        {
             Key = "teamTitle",
             Group = Sections,
             Label = "Ekip",

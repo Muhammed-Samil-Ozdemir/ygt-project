@@ -188,6 +188,73 @@ namespace Ygt.WebAPI.Migrations
                     b.ToTable("CourseApplications", (string)null);
                 });
 
+            modelBuilder.Entity("Ygt.WebAPI.Models.Event", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Style")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Events", (string)null);
+                });
+
+            modelBuilder.Entity("Ygt.WebAPI.Models.EventPhoto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("EventPhotos", (string)null);
+                });
+
             modelBuilder.Entity("Ygt.WebAPI.Models.Form", b =>
                 {
                     b.Property<Guid>("Id")
@@ -570,6 +637,17 @@ namespace Ygt.WebAPI.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Ygt.WebAPI.Models.EventPhoto", b =>
+                {
+                    b.HasOne("Ygt.WebAPI.Models.Event", "Event")
+                        .WithMany("Photos")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("Ygt.WebAPI.Models.FormApplication", b =>
                 {
                     b.HasOne("Ygt.WebAPI.Models.Form", "Form")
@@ -595,6 +673,11 @@ namespace Ygt.WebAPI.Migrations
             modelBuilder.Entity("Ygt.WebAPI.Models.Course", b =>
                 {
                     b.Navigation("Applications");
+                });
+
+            modelBuilder.Entity("Ygt.WebAPI.Models.Event", b =>
+                {
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("Ygt.WebAPI.Models.Form", b =>
