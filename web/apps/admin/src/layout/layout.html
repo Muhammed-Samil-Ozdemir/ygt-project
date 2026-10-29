@@ -2,10 +2,16 @@
   <aside class="sidebar" [class.open]="menuOpen()">
     <div class="sidebar-head">
       <a routerLink="/" class="sidebar-brand" (click)="closeMenu()">
-        <img src="images/logo.png" alt="" width="30" height="31" />
+        @if (brand.logo(); as logo) {
+          <img class="sidebar-logo" [src]="logo" alt="" />
+        } @else {
+          <span class="sidebar-mark"><ygt-icon name="layout" /></span>
+        }
         <span>
-          <strong>YGT</strong>
-          <small>Yönetim paneli</small>
+          <strong>Yönetim paneli</strong>
+          @if (brand.siteName(); as siteName) {
+            <small>{{ siteName }}</small>
+          }
         </span>
       </a>
       <button

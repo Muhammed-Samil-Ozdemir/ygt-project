@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
@@ -10,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Course, CourseApplicationCommand, HttpService, Icon, ToastService } from '@ygt/libraries';
 import { ApplicationSent } from '../../components/application-sent';
+import { SiteService } from '../../services/site';
 
 @Component({
   imports: [ApplicationSent, FormsModule, Icon, RouterLink],
@@ -20,7 +22,10 @@ import { ApplicationSent } from '../../components/application-sent';
 export default class CourseApplication implements OnInit {
   readonly #http = inject(HttpService);
   readonly #toast = inject(ToastService);
+  readonly #site = inject(SiteService);
 
+  /** Açık eğitim yokken görünen metin; panelden gelir. */
+  protected readonly noCourseText = computed(() => this.#site.content()?.texts.noCourseText ?? '');
   /** null: yükleniyor. */
   protected readonly courses = signal<Course[] | null>(null);
   protected readonly sending = signal(false);

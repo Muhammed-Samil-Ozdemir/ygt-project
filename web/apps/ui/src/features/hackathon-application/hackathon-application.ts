@@ -32,7 +32,7 @@ export default class HackathonApplication implements OnInit {
   readonly #toast = inject(ToastService);
   readonly #site = inject(SiteService);
 
-  /** Aydınlatma metni panelden ("Başvurular" grubu) gelir. */
+  /** Aydınlatma metni panelden ("Başvurular" grubu) gelir. null: yükleniyor, "": girilmemiş. */
   protected readonly kvkkText = computed(() => this.#site.content()?.texts.kvkkText ?? null);
   protected readonly form = signal<Form | null>(null);
   protected readonly closedMessage = signal<string | null>(null);

@@ -17,6 +17,8 @@ export abstract class EditableList<TItem extends { id: string }, TCommand> imple
   protected readonly items = signal<TItem[] | null>(null);
   /** İşlem süren kaydın ID'si; o kaydın butonları kilitlenir. */
   protected readonly busyId = signal<string | null>(null);
+  /** Görseli yüklenen ya da kaldırılan kaydın ID'si. */
+  protected readonly imageBusyId = signal<string | null>(null);
   protected readonly adding = signal(false);
 
   /** API adresi, ör. "/api/site/content/about". */
@@ -105,6 +107,41 @@ export abstract class EditableList<TItem extends { id: string }, TCommand> imple
         this.busyId.set(null);
       },
       () => this.busyId.set(null),
+    );
+  }
+
+  /**
+   * Kaydın görselini yükler (ekip fotoğrafı, kart görseli). path: API'deki alt yol, ör. "photo".
+   * Sadece görsel değişir (apply); kayıttaki kaydedilmemiş diğer değişiklikler korunur.
+   */
+  protected uploadImage(item: TItem, path: string, file: File, apply: (updated: TItem) => void) {
+    this.imageBusyId.set(item.id);
+    this.#http.upload<TItem>(
+      `${this.endpoint}/${item.id}/${path}`,
+      file,
+      (updated) => {
+        apply(updated);
+        this.imageBusyId.set(null);
+        this.#toast.success('Görsel yüklendi.');
+      },
+      () => this.imageBusyId.set(null),
+    );
+  }
+
+  protected removeImage(item: TItem, path: string, question: string, apply: () => void) {
+    if (!confirm(question)) {
+      return;
+    }
+
+    this.imageBusyId.set(item.id);
+    this.#http.delete(
+      `${this.endpoint}/${item.id}/${path}`,
+      () => {
+        apply();
+        this.imageBusyId.set(null);
+        this.#toast.success('Görsel kaldırıldı.');
+      },
+      () => this.imageBusyId.set(null),
     );
   }
 

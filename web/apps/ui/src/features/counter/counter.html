@@ -1,6 +1,9 @@
 <div class="counter-page">
   <div class="counter-glow" aria-hidden="true"></div>
-  <img class="counter-logo" src="images/logo.png" alt="Yazılım Geliştirme Topluluğu logosu" width="120" height="126" />
+  @let texts = content()?.texts;
+  @if (texts && texts.logo) {
+    <img class="counter-logo" [src]="imageUrl(texts.logo)" [alt]="texts.siteName" />
+  }
 
   @if (countdown(); as countdown) {
     <h1 class="counter-title">{{ countdown.title }}</h1>
@@ -12,7 +15,7 @@
         </div>
       }
     </div>
-  } @else if (loaded()) {
-    <h1 class="counter-title">Hoş geldiniz!</h1>
+  } @else if (loaded() && texts) {
+    <h1 class="counter-title">{{ texts.counterIdleTitle }}</h1>
   }
 </div>

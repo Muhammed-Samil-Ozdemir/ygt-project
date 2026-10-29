@@ -10,24 +10,13 @@
   <div class="team-editor">
     @for (member of list; track member.id) {
       <form class="card member-card" [class.is-hidden]="!member.isVisible" (ngSubmit)="save(member)" novalidate>
-        <div class="member-photo-edit">
-          @if (member.photo; as photo) {
-            <img [src]="photoUrl(photo)" [alt]="member.name" width="120" height="120" />
-          } @else {
-            <span class="member-photo-empty"><ygt-icon name="image" /></span>
-          }
-          <div class="member-photo-actions">
-            <input #photoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="uploadPhoto(member, $event)" />
-            <button type="button" class="btn btn-outline btn-sm" [disabled]="photoBusyId() === member.id" (click)="photoInput.click()">
-              {{ photoBusyId() === member.id ? 'Yükleniyor...' : member.photo ? 'Değiştir' : 'Fotoğraf yükle' }}
-            </button>
-            @if (member.photo) {
-              <button type="button" class="btn btn-ghost btn-sm" [disabled]="photoBusyId() === member.id" (click)="removePhoto(member)">
-                Kaldır
-              </button>
-            }
-          </div>
-        </div>
+        <app-image-field
+          [src]="member.photo ? imageUrl(member.photo) : null"
+          [alt]="member.name"
+          [busy]="imageBusyId() === member.id"
+          (upload)="uploadPhoto(member, $event)"
+          (remove)="removePhoto(member)"
+        />
 
         <div class="stack member-fields">
           <div class="item-head">

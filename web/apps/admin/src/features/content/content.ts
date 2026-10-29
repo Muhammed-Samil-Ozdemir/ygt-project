@@ -11,7 +11,7 @@ import { Icon, IconName } from '@ygt/libraries';
 })
 export default class Content {
   protected readonly tabs: { link: string; label: string; icon: IconName }[] = [
-    { link: 'texts', label: 'Metinler', icon: 'text' },
+    { link: 'texts', label: 'Metinler ve görseller', icon: 'text' },
     { link: 'about', label: 'Hakkımızda', icon: 'layout' },
     { link: 'team', label: 'Ekip', icon: 'users' },
     { link: 'technologies', label: 'Teknolojiler', icon: 'tag' },

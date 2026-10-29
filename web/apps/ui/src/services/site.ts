@@ -1,9 +1,9 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { DOCUMENT, inject, Injectable, signal } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { HttpService, SiteContent, SiteSettings } from '@ygt/libraries';
+import { HttpService, setFavicon, SiteContent, SiteSettings, siteImageUrl, SiteTexts } from '@ygt/libraries';
 
 /**
- * Site ayarları (ana sayfa butonu, geri sayım) ve panelden yönetilen içerik (metinler, ekip, bağlantılar...).
+ * Site ayarları (ana sayfa butonu, geri sayım) ve panelden yönetilen içerik (metinler, görseller, ekip...).
  * Uygulama açılırken bir kez yüklenir; panelde yapılan değişiklik site yenilenince görünür.
  */
 @Injectable({
@@ -13,6 +13,7 @@ export class SiteService {
   readonly #http = inject(HttpService);
   readonly #title = inject(Title);
   readonly #meta = inject(Meta);
+  readonly #document = inject(DOCUMENT);
   readonly #settings = signal<SiteSettings | null>(null);
   readonly #content = signal<SiteContent | null>(null);
 
@@ -26,13 +27,29 @@ export class SiteService {
       '/api/site/content',
       (content) => {
         this.#content.set(content);
-        // Sayfa başlığı ve açıklaması da panelden gelir; index.html'dekiler içerik yüklenene kadar görünür.
-        this.#title.setTitle(content.texts.seoTitle);
-        this.#meta.updateTag({ name: 'description', content: content.texts.seoDescription });
+        this.#applyHead(content.texts);
       },
       undefined,
       { quiet: true },
     );
+  }
+
+  /**
+   * Sekme başlığı, açıklama ve sekme simgesi de panelden gelir. index.html'deki başlık ve açıklama içerik
+   * yüklenene kadar (ve panelde boş bırakılırsa) görünür.
+   */
+  #applyHead(texts: SiteTexts) {
+    const title = texts.seoTitle || texts.siteName;
+    if (title) {
+      this.#title.setTitle(title);
+    }
+    if (texts.seoDescription) {
+      this.#meta.updateTag({ name: 'description', content: texts.seoDescription });
+    }
+    const icon = texts.favicon || texts.logo;
+    if (icon) {
+      setFavicon(this.#document, siteImageUrl(icon));
+    }
   }
 
   /** Ana sayfa ziyaret sayacını artırır. Hata olursa kullanıcıya gösterilmez. */

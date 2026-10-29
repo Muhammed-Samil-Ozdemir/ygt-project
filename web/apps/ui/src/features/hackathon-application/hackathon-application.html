@@ -71,15 +71,19 @@
           </fieldset>
         }
 
+        @let kvkk = kvkkText();
         <div class="stack kvkk">
-          <details>
-            <summary><ygt-icon name="shield" /> Aydınlatma metnini oku</summary>
-            @if (kvkkText(); as text) {
-              <p class="kvkk-text small pre-line">{{ text }}</p>
-            } @else {
-              <p class="kvkk-text loading small">Yükleniyor...</p>
-            }
-          </details>
+          <!-- Metin panelde boş bırakıldıysa sadece onay kutusu görünür. -->
+          @if (kvkk !== '') {
+            <details>
+              <summary><ygt-icon name="shield" /> Aydınlatma metnini oku</summary>
+              @if (kvkk === null) {
+                <p class="kvkk-text loading small">Yükleniyor...</p>
+              } @else {
+                <p class="kvkk-text small pre-line">{{ kvkk }}</p>
+              }
+            </details>
+          }
           <label class="checkbox">
             <input type="checkbox" name="kvkkApproved" [(ngModel)]="kvkkApproved" />
             <span>Aydınlatma metnini okudum, kişisel verilerimin işlenmesini onaylıyorum.</span>

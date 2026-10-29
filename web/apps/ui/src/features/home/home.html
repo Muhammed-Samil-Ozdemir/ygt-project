@@ -1,9 +1,11 @@
 @let site = content();
+@let heroImage = site?.texts.heroImage;
+@let logo = site?.texts.logo;
 
 <section class="hero">
   <div class="hero-backdrop" aria-hidden="true"></div>
 
-  <div class="container hero-inner">
+  <div class="container hero-inner" [class.hero-inner-single]="site && !heroImage && !logo">
     <div class="hero-text">
       @if (site; as site) {
         @if (site.texts.heroEyebrow) {
@@ -12,7 +14,9 @@
             {{ site.texts.heroEyebrow }}
           </p>
         }
-        <h1 class="hero-title"><app-accent-text [text]="site.texts.heroTitle" /></h1>
+        @if (site.texts.heroTitle || site.texts.siteName; as title) {
+          <h1 class="hero-title"><app-accent-text [text]="title" /></h1>
+        }
         @if (site.texts.heroLead) {
           <p class="hero-lead pre-line">{{ site.texts.heroLead }}</p>
         }
@@ -38,12 +42,19 @@
       }
     </div>
 
-    <div class="hero-visual" aria-hidden="true">
-      <div class="hero-orbit"></div>
-      <div class="hero-logo-wrap">
-        <img class="hero-logo" src="images/logo.png" alt="" width="200" height="210" />
+    <!-- Giriş görseli yüklendiyse o, yoksa logo halka içinde gösterilir. -->
+    @if (heroImage) {
+      <div class="hero-visual" aria-hidden="true">
+        <img class="hero-image" [src]="imageUrl(heroImage)" alt="" />
       </div>
-    </div>
+    } @else if (logo) {
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-orbit"></div>
+        <div class="hero-logo-wrap">
+          <img class="hero-logo" [src]="imageUrl(logo)" alt="" />
+        </div>
+      </div>
+    }
   </div>
 </section>
 
@@ -70,10 +81,13 @@
   @if (site.about.length || site.texts.joinUrl) {
     <section id="about" class="section">
       <div class="container">
-        <h2 class="section-title">Hakkımızda</h2>
+        <h2 class="section-title">{{ site.texts.aboutTitle }}</h2>
         <div class="about-grid">
           @for (item of site.about; track $index) {
             <article class="card about-card">
+              @if (item.image; as image) {
+                <img class="about-image" [src]="imageUrl(image)" alt="" loading="lazy" />
+              }
               <span class="about-number" aria-hidden="true">{{ number($index) }}</span>
               <h3>{{ item.title }}</h3>
               <p class="muted pre-line">{{ item.text }}</p>
@@ -99,13 +113,13 @@
   @if (site.team.length) {
     <section id="team" class="section section-alt">
       <div class="container">
-        <h2 class="section-title">Ekibimiz</h2>
+        <h2 class="section-title">{{ site.texts.teamTitle }}</h2>
         <ul class="team-grid">
           @for (member of site.team; track $index) {
             <li class="member">
               <div class="member-photo">
                 @if (member.photo; as photo) {
-                  <img [src]="photoUrl(photo)" [alt]="member.name" width="240" height="240" loading="lazy" />
+                  <img [src]="imageUrl(photo)" [alt]="member.name" width="240" height="240" loading="lazy" />
                 } @else {
                   <span class="member-initials" aria-hidden="true">{{ initials(member.name) }}</span>
                 }
@@ -122,7 +136,7 @@
   @if (site.technologies.length) {
     <section class="section">
       <div class="container">
-        <h2 class="section-title">Çalıştığımız teknolojiler</h2>
+        <h2 class="section-title">{{ site.texts.technologiesTitle }}</h2>
         <ul class="chips">
           @for (technology of site.technologies; track $index) {
             <li class="chip">{{ technology }}</li>

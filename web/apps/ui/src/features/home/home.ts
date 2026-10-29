@@ -6,7 +6,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Icon, teamPhotoUrl } from '@ygt/libraries';
+import { Icon, siteImageUrl } from '@ygt/libraries';
 import { AccentText } from '../../components/accent-text';
 import { SiteService } from '../../services/site';
 import { injectNow, timeLeft, timeParts } from '../../utils/countdown';
@@ -21,9 +21,9 @@ export default class Home {
   readonly #site = inject(SiteService);
   readonly #now = injectNow();
 
-  /** Metinler, kartlar, ekip ve teknolojiler panelden yönetilir; yüklenene kadar null. */
+  /** Metinler, görseller, kartlar, ekip ve teknolojiler panelden yönetilir; yüklenene kadar null. */
   protected readonly content = this.#site.content;
-  protected readonly photoUrl = teamPhotoUrl;
+  protected readonly imageUrl = siteImageUrl;
 
   /** Admin panelinden geri sayım ayarlanmışsa ve süre dolmamışsa gösterilir. */
   protected readonly countdown = computed(() => {

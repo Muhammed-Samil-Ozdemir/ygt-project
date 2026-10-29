@@ -2,9 +2,13 @@
   <div class="login-glow" aria-hidden="true"></div>
   <div class="card login-card">
     <div class="login-head">
-      <img src="images/logo.png" alt="" width="56" height="58" />
+      @if (brand.logo(); as logo) {
+        <img class="login-logo" [src]="logo" alt="" />
+      }
       <h1>Yönetim paneli</h1>
-      <p class="muted small">Yazılım Geliştirme Topluluğu</p>
+      @if (brand.siteName(); as siteName) {
+        <p class="muted small">{{ siteName }}</p>
+      }
     </div>
 
     <form class="stack" (ngSubmit)="login()" novalidate>

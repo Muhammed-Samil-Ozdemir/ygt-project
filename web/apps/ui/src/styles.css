@@ -42,6 +42,14 @@
   text-decoration: none;
 }
 
+/* Logo panelden yüklenir; oranı bilinmediği için yüksekliği sabit, genişliği sınırlı. */
+.brand-logo {
+  width: auto;
+  max-width: 160px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .site-nav {
   display: flex;
   align-items: center;
@@ -148,6 +156,11 @@
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
   align-items: center;
   gap: 48px;
+}
+
+/* Giriş görseli ve logo yoksa yazı tek sütun */
+.hero-inner-single {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .hero-text {
@@ -270,8 +283,19 @@
 
 .hero-logo {
   width: 56%;
-  height: auto;
+  height: 56%;
+  object-fit: contain;
   filter: drop-shadow(0 10px 16px rgba(239, 65, 38, 0.25));
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow:
+    0 32px 64px -24px rgba(20, 27, 36, 0.45),
+    0 0 0 1px rgba(20, 27, 36, 0.06);
 }
 
 @media (max-width: 860px) {
@@ -443,6 +467,17 @@
   border-color: #f3d3cb;
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
+}
+
+/* Kartın üstünde, kenarlara dayalı görsel */
+.about-image {
+  width: calc(100% + 56px);
+  max-width: none;
+  margin: -28px -28px 4px;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0;
+  object-fit: cover;
+  background: var(--color-surface);
 }
 
 .about-number {
@@ -898,8 +933,10 @@
 }
 
 .counter-logo {
-  width: 110px;
+  width: auto;
+  max-width: 240px;
   height: auto;
+  max-height: 120px;
   filter: drop-shadow(0 8px 24px rgba(239, 65, 38, 0.45));
 }
 

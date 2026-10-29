@@ -10,9 +10,7 @@
       <div class="result">
         <span class="result-icon"><ygt-icon name="book" /></span>
         <h1>Eğitim başvurusu</h1>
-        <p class="muted">
-          Şu anda başvuruya açık bir eğitim bulunmuyor. Yeni eğitimleri sosyal medya hesaplarımızdan duyuruyoruz.
-        </p>
+        <p class="muted pre-line">{{ noCourseText() }}</p>
         <a class="btn btn-outline" routerLink="/">Ana sayfaya dön</a>
       </div>
     } @else {

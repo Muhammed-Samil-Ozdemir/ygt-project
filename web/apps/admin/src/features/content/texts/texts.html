@@ -2,6 +2,11 @@
 @if (list === null) {
   <p class="loading">Yükleniyor...</p>
 } @else {
+  <p class="muted section-note">
+    Hepsi isteğe bağlı. Boş bırakılan yazı ve görsel sitede gösterilmez; bölüm başlığı gibi bazı alanlarda soluk
+    yazılan genel ifade kullanılır. Görseller PNG, JPG ya da WEBP olabilir, en fazla 5 MB.
+  </p>
+
   <form class="stack" (ngSubmit)="save()" novalidate>
     @for (group of list; track group.name) {
       <section class="card text-group">
@@ -9,35 +14,48 @@
         <div class="stack">
           @for (field of group.fields; track field.key) {
             <div class="field">
-              <label [for]="field.key">
-                {{ field.label }}
-                @if (!field.isRequired) {
-                  <span class="optional">(isteğe bağlı)</span>
-                }
-              </label>
-              @if (field.kind === 'longText') {
-                <textarea
-                  [id]="field.key"
-                  class="textarea"
-                  [class.textarea-tall]="field.maxLength > 2000"
-                  [name]="field.key"
-                  [maxlength]="field.maxLength"
-                  [(ngModel)]="field.value"
-                ></textarea>
-              } @else {
-                <input
-                  [id]="field.key"
-                  class="input"
-                  [type]="field.kind === 'url' ? 'url' : 'text'"
-                  [name]="field.key"
-                  [maxlength]="field.maxLength"
-                  [placeholder]="field.kind === 'url' ? 'https://...' : ''"
-                  [(ngModel)]="field.value"
+              @if (field.kind === 'image') {
+                <span class="label">{{ field.label }}</span>
+                <app-image-field
+                  shape="contain"
+                  [src]="field.value ? imageUrl(field.value) : null"
+                  [alt]="field.label"
+                  [busy]="imageBusyKey() === field.key"
+                  (upload)="uploadImage(field, $event)"
+                  (remove)="removeImage(field)"
                 />
+              } @else {
+                <label [for]="field.key">{{ field.label }}</label>
+                @if (field.kind === 'longText') {
+                  <textarea
+                    [id]="field.key"
+                    class="textarea"
+                    [class.textarea-tall]="field.maxLength > 2000"
+                    [name]="field.key"
+                    [maxlength]="field.maxLength"
+                    [placeholder]="field.placeholder ?? ''"
+                    [(ngModel)]="field.value"
+                  ></textarea>
+                } @else {
+                  <input
+                    [id]="field.key"
+                    class="input"
+                    [type]="field.kind === 'url' ? 'url' : 'text'"
+                    [name]="field.key"
+                    [maxlength]="field.maxLength"
+                    [placeholder]="field.placeholder ?? (field.kind === 'url' ? 'https://...' : '')"
+                    [(ngModel)]="field.value"
+                  />
+                }
               }
               <div class="field-meta">
-                <span class="hint">{{ field.hint }}</span>
-                @if (field.kind !== 'url') {
+                <span class="hint">
+                  {{ field.hint }}
+                  @if (field.placeholder) {
+                    Boş bırakılırsa “{{ field.placeholder }}” yazar.
+                  }
+                </span>
+                @if (field.kind === 'text' || field.kind === 'longText') {
                   <span class="counter">{{ field.value.length }} / {{ field.maxLength }}</span>
                 }
               </div>
@@ -48,7 +66,9 @@
     }
 
     <div class="save-bar">
-      <span class="muted small">Metin içinde HTML kullanılamaz; yazdığınız gibi gösterilir. Satır sonları korunur.</span>
+      <span class="muted small">
+        Metin içinde HTML kullanılamaz; yazdığınız gibi gösterilir. Görseller seçilince hemen yüklenir.
+      </span>
       <button type="submit" class="btn btn-primary" [disabled]="saving()">
         {{ saving() ? 'Kaydediliyor...' : 'Metinleri kaydet' }}
       </button>

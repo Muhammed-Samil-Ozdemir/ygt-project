@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpService, LoginRequest, TokenResponse, tokenStore } from '@ygt/libraries';
 import { hasValidToken } from '../../../guards/auth-guard';
+import { BrandService } from '../../../services/brand';
 
 @Component({
   imports: [FormsModule],
@@ -21,6 +22,7 @@ export default class Login implements OnInit {
   readonly #http = inject(HttpService);
   readonly #router = inject(Router);
 
+  protected readonly brand = inject(BrandService);
   protected readonly sending = signal(false);
   protected model: LoginRequest = { email: '', password: '' };
 

@@ -324,7 +324,9 @@ img {
   gap: 6px;
 }
 
-.field label {
+/* .label: label olamayan alan başlıkları (ör. görsel alanı) */
+.field label,
+.field .label {
   font-size: 0.9rem;
   font-weight: 600;
 }

@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastContainer } from '@ygt/libraries';
+import { BrandService } from './services/brand';
 
 @Component({
   imports: [RouterOutlet, ToastContainer],
@@ -8,4 +9,10 @@ import { ToastContainer } from '@ygt/libraries';
   template: '<router-outlet /><ygt-toasts />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class App {}
+export class App {
+  readonly #brand = inject(BrandService);
+
+  constructor() {
+    this.#brand.load();
+  }
+}

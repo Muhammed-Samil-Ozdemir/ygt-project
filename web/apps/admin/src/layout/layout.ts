@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewEncapsulation } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Icon, IconName, tokenStore } from '@ygt/libraries';
+import { BrandService } from '../services/brand';
 
 @Component({
   imports: [Icon, RouterLink, RouterLinkActive, RouterOutlet],
@@ -10,6 +11,8 @@ import { Icon, IconName, tokenStore } from '@ygt/libraries';
 })
 export default class Layout {
   readonly #router = inject(Router);
+
+  protected readonly brand = inject(BrandService);
 
   protected readonly nav: { link: string; label: string; icon: IconName; exact: boolean }[] = [
     { link: '/', label: 'Panel', icon: 'home', exact: true },

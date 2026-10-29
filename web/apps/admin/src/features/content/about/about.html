@@ -3,7 +3,8 @@
   <p class="loading">Yükleniyor...</p>
 } @else {
   <p class="muted section-note">
-    Kartlar ana sayfadaki "Hakkımızda" bölümünde bu sırayla görünür. "Bize katıl" kartının metni Metinler sekmesinde.
+    Kartlar ana sayfadaki "Hakkımızda" bölümünde bu sırayla görünür. Görsel isteğe bağlıdır, kartın üstünde yatay
+    (16:9) görünür. Bölüm başlığı ve "Bize katıl" kartı "Metinler ve görseller" sekmesinde.
   </p>
 
   <div class="item-list">
@@ -36,6 +37,15 @@
             </button>
           </div>
         </div>
+
+        <app-image-field
+          shape="wide"
+          [src]="card.image ? imageUrl(card.image) : null"
+          [alt]="card.title"
+          [busy]="imageBusyId() === card.id"
+          (upload)="uploadCardImage(card, $event)"
+          (remove)="removeCardImage(card)"
+        />
 
         <div class="field">
           <label [for]="card.id + '-title'">Başlık</label>
@@ -79,7 +89,7 @@
       <textarea id="new-text" class="textarea" name="text" maxlength="1000" [(ngModel)]="newCard.text"></textarea>
     </div>
     <div class="item-foot">
-      <span class="muted small">Kart listenin sonuna eklenir.</span>
+      <span class="muted small">Kart listenin sonuna eklenir; görselini ekledikten sonra yükleyebilirsiniz.</span>
       <button type="submit" class="btn btn-primary" [disabled]="adding()">{{ adding() ? 'Ekleniyor...' : 'Kartı ekle' }}</button>
     </div>
   </form>

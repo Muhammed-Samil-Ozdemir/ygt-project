@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Certificate, HttpService, Icon } from '@ygt/libraries';
+import { SiteService } from '../../services/site';
 
 @Component({
   imports: [Icon, RouterLink],
@@ -19,6 +20,7 @@ import { Certificate, HttpService, Icon } from '@ygt/libraries';
 })
 export default class CertificatePage implements OnInit {
   readonly #http = inject(HttpService);
+  readonly #site = inject(SiteService);
 
   /** Adresteki doğrulama kodu (/certificates/:code). */
   readonly code = input.required<string>();
@@ -26,6 +28,8 @@ export default class CertificatePage implements OnInit {
   protected readonly certificate = signal<Certificate | null>(null);
   protected readonly notFound = signal(false);
   protected readonly imageUrl = computed(() => `/api/certificates/${encodeURIComponent(this.code())}/image`);
+  /** Doğrulama kodunun önündeki not ("Bu sertifika ... tarafından verilmiştir."); panelden gelir. */
+  protected readonly note = computed(() => this.#site.content()?.texts.certificateNote ?? '');
 
   ngOnInit() {
     this.#http.get<Certificate>(

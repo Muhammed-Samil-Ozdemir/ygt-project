@@ -1,35 +1,53 @@
 /**
- * Sitenin panelden değiştirilen tek parça metinleri. Anahtarlar API'deki SiteTextCatalog ile aynı;
- * katalogda yeni metin tanımlanırsa buraya da eklenmeli. İsteğe bağlı metin boş bırakılmışsa "" gelir.
+ * Sitenin panelden değiştirilen tek parça metinleri ve görselleri. Anahtarlar API'deki SiteTextCatalog ile aynı;
+ * katalogda yeni alan tanımlanırsa buraya da eklenmeli. Boş bırakılmış metin "" gelir; genel bir ifadesi varsa
+ * (ör. bölüm başlığı "Hakkımızda") onun yerine o gelir. Görsellerde değer dosya adıdır, adresi siteImageUrl() verir.
  */
 export interface SiteTexts {
   siteName: string;
+  /** Görsel */
+  logo: string;
+  /** Görsel */
+  favicon: string;
   seoTitle: string;
   seoDescription: string;
   heroEyebrow: string;
   heroTitle: string;
   heroLead: string;
   heroSecondaryButton: string;
-  joinButton: string;
+  /** Görsel */
+  heroImage: string;
+  aboutTitle: string;
+  teamTitle: string;
+  technologiesTitle: string;
+  linksTitle: string;
   joinUrl: string;
+  joinButton: string;
   joinTitle: string;
   joinText: string;
   footerText: string;
   universityName: string;
   universityUrl: string;
+  courseButton: string;
+  formButton: string;
+  noCourseText: string;
   applicationThanks: string;
   kvkkText: string;
+  certificateNote: string;
+  counterIdleTitle: string;
 }
 
 export interface AboutCard {
   title: string;
   text: string;
+  /** Görselin dosya adı; adresi siteImageUrl() verir. Görsel yoksa null. */
+  image: string | null;
 }
 
 export interface TeamMember {
   name: string;
   role: string;
-  /** Fotoğrafın dosya adı; adresi teamPhotoUrl() verir. Fotoğraf yoksa null. */
+  /** Fotoğrafın dosya adı; adresi siteImageUrl() verir. Fotoğraf yoksa null. */
   photo: string | null;
 }
 
@@ -47,23 +65,26 @@ export interface SiteContent {
   links: SiteLink[];
 }
 
-export function teamPhotoUrl(photo: string): string {
-  return `/api/site/content/photos/${encodeURIComponent(photo)}`;
+/** Panelden yüklenen görselin (logo, ekip fotoğrafı, kart görseli...) adresi. */
+export function siteImageUrl(fileName: string): string {
+  return `/api/site/content/images/${encodeURIComponent(fileName)}`;
 }
 
 // Yönetim paneli
 
-export type SiteTextKind = 'text' | 'longText' | 'url';
+export type SiteTextKind = 'text' | 'longText' | 'url' | 'image';
 
-/** Panelde bir metin alanı: tanımı ve şu anki değeri. */
+/** Panelde bir metin ya da görsel alanı: tanımı ve kayıtlı değeri ("" ise boş; görselde dosya adı). */
 export interface SiteTextField {
   key: keyof SiteTexts;
   group: string;
   label: string;
   hint: string | null;
   kind: SiteTextKind;
+  /** Görsellerde 0. */
   maxLength: number;
-  isRequired: boolean;
+  /** Boş bırakılırsa sitede yazılan genel ifade. */
+  placeholder: string | null;
   value: string;
 }
 

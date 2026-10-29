@@ -1,13 +1,19 @@
 @let texts = content()?.texts;
 @let links = content()?.links ?? [];
 
+<ng-template #brand>
+  @if (texts?.logo; as logo) {
+    <img class="brand-logo" [src]="imageUrl(logo)" alt="" height="32" />
+  }
+  @if (texts?.siteName; as siteName) {
+    <app-accent-text [text]="siteName" />
+  }
+</ng-template>
+
 <header class="site-header" [class.scrolled]="scrolled() || menuOpen()">
   <div class="container site-header-inner">
-    <a routerLink="/" class="brand" (click)="closeMenu()">
-      <img src="images/logo.png" alt="" width="30" height="32" />
-      @if (texts) {
-        <app-accent-text [text]="texts.siteName" />
-      }
+    <a routerLink="/" class="brand" [attr.aria-label]="texts?.siteName || 'Ana sayfa'" (click)="closeMenu()">
+      <ng-container [ngTemplateOutlet]="brand" />
     </a>
 
     <button
@@ -22,11 +28,11 @@
     </button>
 
     <nav id="site-menu" class="site-nav" [class.open]="menuOpen()">
-      @if (content()?.about?.length || texts?.joinUrl) {
-        <a class="nav-link" routerLink="/" fragment="about" (click)="closeMenu()">Hakkımızda</a>
+      @if (texts && (content()?.about?.length || texts.joinUrl)) {
+        <a class="nav-link" routerLink="/" fragment="about" (click)="closeMenu()">{{ texts.aboutTitle }}</a>
       }
-      @if (content()?.team?.length) {
-        <a class="nav-link" routerLink="/" fragment="team" (click)="closeMenu()">Ekibimiz</a>
+      @if (texts && content()?.team?.length) {
+        <a class="nav-link" routerLink="/" fragment="team" (click)="closeMenu()">{{ texts.teamTitle }}</a>
       }
       @if (application(); as application) {
         <a class="btn btn-outline" [routerLink]="application.link" (click)="closeMenu()">{{ application.label }}</a>
@@ -47,12 +53,11 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-about">
-      <a routerLink="/" class="brand">
-        <img src="images/logo.png" alt="" width="30" height="32" />
-        @if (texts) {
-          <app-accent-text [text]="texts.siteName" />
-        }
-      </a>
+      @if (texts?.logo || texts?.siteName) {
+        <a routerLink="/" class="brand" [attr.aria-label]="texts?.siteName || 'Ana sayfa'">
+          <ng-container [ngTemplateOutlet]="brand" />
+        </a>
+      }
       @if (texts?.footerText) {
         <p class="pre-line">{{ texts.footerText }}</p>
       }
@@ -64,9 +69,9 @@
       }
     </div>
 
-    @if (links.length) {
+    @if (texts && links.length) {
       <div>
-        <h2 class="footer-title">Bizi takip edin</h2>
+        <h2 class="footer-title">{{ texts.linksTitle }}</h2>
         <ul class="footer-links">
           @for (link of links; track $index) {
             <li>
@@ -79,7 +84,13 @@
   </div>
 
   <div class="container footer-bottom">
-    <span>© {{ year }} {{ texts?.siteName }}. Tüm hakları saklıdır.</span>
+    <span>
+      © {{ year }}
+      @if (texts?.siteName) {
+        {{ texts?.siteName }}.
+      }
+      Tüm hakları saklıdır.
+    </span>
     <a href="/admin/">Yönetim paneli</a>
   </div>
 </footer>

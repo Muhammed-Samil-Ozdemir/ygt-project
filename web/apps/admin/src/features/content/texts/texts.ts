@@ -7,7 +7,9 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpService, SiteTextField, SiteTextsCommand, ToastService } from '@ygt/libraries';
+import { HttpService, SiteTextField, siteImageUrl, SiteTextsCommand, ToastService } from '@ygt/libraries';
+import { ImageField } from '../../../components/image-field';
+import { BrandService } from '../../../services/brand';
 
 interface TextGroup {
   name: string;
@@ -15,11 +17,12 @@ interface TextGroup {
 }
 
 /**
- * Sitedeki tek parça metinler. Alanlar API'deki tanımlardan (SiteTextCatalog) çizilir;
- * yeni metin eklemek için panelde değişiklik gerekmez.
+ * Sitedeki tek parça metinler ve görseller (logo, sekme simgesi...). Alanlar API'deki tanımlardan
+ * (SiteTextCatalog) çizilir; yeni alan eklemek için panelde değişiklik gerekmez.
+ * Metinler "Kaydet" ile birlikte gönderilir, görseller seçilince hemen yüklenir.
  */
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, ImageField],
   templateUrl: './texts.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,10 +30,14 @@ interface TextGroup {
 export default class ContentTexts implements OnInit {
   readonly #http = inject(HttpService);
   readonly #toast = inject(ToastService);
+  readonly #brand = inject(BrandService);
 
   /** null: yükleniyor. */
   protected readonly groups = signal<TextGroup[] | null>(null);
   protected readonly saving = signal(false);
+  /** Görseli yüklenen ya da kaldırılan alanın anahtarı. */
+  protected readonly imageBusyKey = signal<string | null>(null);
+  protected readonly imageUrl = siteImageUrl;
 
   ngOnInit() {
     this.#http.get<SiteTextField[]>('/api/site/content/texts', (fields) => {
@@ -50,7 +57,9 @@ export default class ContentTexts implements OnInit {
   protected save() {
     const fields = this.groups()?.flatMap((group) => group.fields) ?? [];
     const command: SiteTextsCommand = {
-      values: Object.fromEntries(fields.map((field) => [field.key, field.value])),
+      values: Object.fromEntries(
+        fields.filter((field) => field.kind !== 'image').map((field) => [field.key, field.value]),
+      ),
     };
 
     this.saving.set(true);
@@ -59,9 +68,46 @@ export default class ContentTexts implements OnInit {
       command,
       () => {
         this.saving.set(false);
+        this.#brand.load();
         this.#toast.success('Metinler kaydedildi. Değişiklik site yenilenince görünür.');
       },
       () => this.saving.set(false),
     );
+  }
+
+  protected uploadImage(field: SiteTextField, file: File) {
+    this.imageBusyKey.set(field.key);
+    this.#http.upload<SiteTextField>(
+      `/api/site/content/texts/${field.key}/image`,
+      file,
+      (updated) => {
+        field.value = updated.value;
+        this.#imageChanged('Görsel yüklendi.');
+      },
+      () => this.imageBusyKey.set(null),
+    );
+  }
+
+  protected removeImage(field: SiteTextField) {
+    if (!confirm(`${field.label} kaldırılsın mı?`)) {
+      return;
+    }
+
+    this.imageBusyKey.set(field.key);
+    this.#http.delete(
+      `/api/site/content/texts/${field.key}/image`,
+      () => {
+        field.value = '';
+        this.#imageChanged('Görsel kaldırıldı.');
+      },
+      () => this.imageBusyKey.set(null),
+    );
+  }
+
+  #imageChanged(message: string) {
+    this.imageBusyKey.set(null);
+    // Logo ve sekme simgesi panelde de kullanılıyor.
+    this.#brand.load();
+    this.#toast.success(`${message} Değişiklik site yenilenince görünür.`);
   }
 }

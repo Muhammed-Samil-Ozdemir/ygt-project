@@ -5,6 +5,7 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { siteImageUrl } from '@ygt/libraries';
 import { SiteService } from '../../services/site';
 import { injectNow, timeLeft, timeParts } from '../../utils/countdown';
 
@@ -18,6 +19,8 @@ export default class Counter {
   readonly #site = inject(SiteService);
   readonly #now = injectNow();
 
+  protected readonly content = this.#site.content;
+  protected readonly imageUrl = siteImageUrl;
   protected readonly loaded = computed(() => this.#site.settings() !== null);
 
   protected readonly countdown = computed(() => {

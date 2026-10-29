@@ -16,8 +16,12 @@
 
       <p class="muted small certificate-note">
         <ygt-icon name="shield" />
-        Bu sertifika Konya Teknik Üniversitesi Yazılım Geliştirme Topluluğu tarafından verilmiştir. Doğrulama kodu:
-        <code>{{ certificate.code }}</code>
+        <span>
+          @if (note()) {
+            {{ note() }}
+          }
+          Doğrulama kodu: <code>{{ certificate.code }}</code>
+        </span>
       </p>
     } @else if (notFound()) {
       <div class="result">

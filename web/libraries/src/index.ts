@@ -13,3 +13,4 @@ export * from './lib/services/error';
 export * from './lib/services/http';
 export * from './lib/services/toast';
 export * from './lib/services/token';
+export * from './lib/utils/favicon';
