@@ -1,5 +1,28 @@
 @import '../../../libraries/src/styles/base.css';
 
+/* El yazısı (etkinlik notları ve polaroid yazıları). Türkçe harfler latin-ext dosyasında. */
+@font-face {
+  font-family: 'Caveat';
+  src: url('./fonts/Caveat-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('./fonts/Caveat-latin-ext.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  --font-hand: 'Caveat', 'Segoe Print', cursive;
+}
+
 /* Üst menü */
 
 .site-header {
@@ -625,6 +648,520 @@
   border-color: #f3c3b6;
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
+}
+
+/* Ana sayfa: etkinlikler (karalama defteri görünümü) */
+
+app-home-events {
+  display: block;
+}
+
+/* Hafif dokulu kâğıt zemin */
+.paper {
+  position: relative;
+  overflow: hidden;
+  background-color: #f6f2ea;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .33 0 0 0 0 .25 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(900px 500px at 15% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(700px 500px at 100% 100%, rgba(232, 218, 196, 0.5), transparent 70%);
+}
+
+.events-recurring {
+  padding-top: 24px;
+}
+
+/* Başlığın arkasından geçen kırmızı ip ve raptiye */
+.board-head,
+.note-head {
+  position: relative;
+  margin-bottom: 56px;
+  padding-top: 44px;
+  text-align: center;
+}
+
+.board-string {
+  position: absolute;
+  top: 26px;
+  left: -50vw;
+  right: -50vw;
+  height: 3px;
+  background: var(--color-primary);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.18);
+  transform: rotate(-1.2deg);
+}
+
+.board-title {
+  color: #3a3a3a;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  letter-spacing: -0.035em;
+}
+
+.pushpin {
+  position: absolute;
+  z-index: 3;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a75, var(--color-primary) 55%, #8f2010);
+  box-shadow: 3px 5px 5px rgba(0, 0, 0, 0.28);
+}
+
+.pushpin-gold {
+  background: radial-gradient(circle at 35% 30%, #ffe9a6, #d4a425 55%, #87650d);
+}
+
+.board-pin {
+  top: 12px;
+  left: calc(50% - 12px);
+}
+
+/* Yırtık kenarlı kraft kâğıdı not. Gölge dış katmanda; clip-path aynı katmanda olsa gölgeyi de keserdi. */
+.kraft-note {
+  position: relative;
+  display: inline-block;
+  filter: drop-shadow(0 10px 14px rgba(60, 40, 20, 0.2));
+  transform: rotate(-1deg);
+}
+
+.kraft-paper {
+  padding: 40px clamp(24px, 6vw, 64px) 46px;
+  background: #e7dbc6;
+  clip-path: polygon(
+    0 0, 100% 0, 100% 90%, 96% 97%, 92% 91%, 87% 99%, 82% 92%, 77% 98%, 72% 91%, 66% 99%, 61% 93%, 55% 100%,
+    50% 92%, 44% 99%, 39% 91%, 33% 98%, 28% 92%, 22% 100%, 17% 93%, 11% 99%, 6% 91%, 0 97%
+  );
+}
+
+.kraft-note .pushpin {
+  top: 12px;
+  left: calc(50% - 12px);
+}
+
+/* Polaroid */
+.polaroid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 12px 16px;
+  border: 0;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 14px 26px -12px rgba(60, 40, 20, 0.4);
+  color: #2b2b2b;
+  font: inherit;
+  cursor: zoom-in;
+  transform: rotate(var(--rotate, 0deg));
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s;
+}
+
+.polaroid:hover,
+.polaroid:focus-visible {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 22px 36px -14px rgba(60, 40, 20, 0.5);
+  transform: scale(1.04) rotate(0deg);
+}
+
+.polaroid img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #ece6dc;
+}
+
+.polaroid-caption {
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* Yarı saydam bant */
+.tape {
+  position: absolute;
+  z-index: 2;
+  top: -12px;
+  left: calc(50% - 46px);
+  width: 92px;
+  height: 26px;
+  background: rgba(244, 228, 168, 0.72);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transform: rotate(-4deg);
+}
+
+.polaroid-count {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(20, 22, 28, 0.72);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Etkinlik panosu: satıra sığmayan son polaroidler ortalanır */
+.polaroid-wall {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 48px 36px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wall-item {
+  position: relative;
+  flex: 0 1 250px;
+  transform: rotate(var(--tilt)) translateY(var(--shift, 0));
+}
+
+.wall-item:nth-child(4n + 1) {
+  --tilt: -3deg;
+}
+
+.wall-item:nth-child(4n + 2) {
+  --tilt: 2.5deg;
+  --shift: 18px;
+}
+
+.wall-item:nth-child(4n + 3) {
+  --tilt: -1.5deg;
+}
+
+.wall-item:nth-child(4n + 4) {
+  --tilt: 3deg;
+  --shift: 12px;
+}
+
+.wall-item:nth-child(even) .tape {
+  transform: rotate(5deg);
+}
+
+/* Birden çok fotoğraflı etkinlikte arkada duran ikinci kart */
+.polaroid-stack {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  box-shadow: 0 10px 20px -12px rgba(60, 40, 20, 0.45);
+  transform: rotate(5deg) translate(8px, 4px);
+}
+
+/* Öne çıkan etkinlik */
+.story {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: 48px;
+  margin-top: 80px;
+}
+
+.story-reverse .story-text {
+  order: 2;
+}
+
+.story-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.story-title {
+  color: #3a3a3a;
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.story-description {
+  display: flex;
+  gap: 14px;
+  font-family: var(--font-hand);
+  font-size: 1.55rem;
+  line-height: 1.35;
+}
+
+.story-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-top: 4px;
+  border: 2px solid #3f8f5a;
+  border-radius: 50%;
+  color: #3f8f5a;
+  font-size: 1.1rem;
+}
+
+/* Üç fotoğrafa kadar kolaj: biri sağ üstte, biri solda, biri altta */
+.story-photos {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.story-photo {
+  grid-column: 3 / 13;
+  max-width: 440px;
+  justify-self: end;
+  --rotate: 2.5deg;
+}
+
+.story-photo:nth-child(2) {
+  grid-column: 1 / 9;
+  justify-self: start;
+  margin-top: -14%;
+  --rotate: -3.5deg;
+}
+
+.story-photo:nth-child(3) {
+  grid-column: 4 / 12;
+  justify-self: center;
+  margin-top: -12%;
+  --rotate: 1.5deg;
+}
+
+.story-photo:only-child {
+  grid-column: 1 / 13;
+  justify-self: center;
+}
+
+.story-photo .pushpin {
+  top: -8px;
+  left: calc(50% - 12px);
+}
+
+.story-photo:nth-child(2) .pushpin {
+  left: 18%;
+}
+
+/* Geleneksel etkinlikler */
+.recurring-list {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recurring-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 48px;
+}
+
+.recurring-item .polaroid {
+  max-width: 460px;
+  justify-self: end;
+  --rotate: -2.5deg;
+}
+
+.recurring-item .polaroid .pushpin {
+  top: -10px;
+  left: calc(50% - 12px);
+}
+
+.recurring-reverse .polaroid {
+  order: 2;
+  justify-self: start;
+  --rotate: 2.5deg;
+}
+
+.recurring-reverse .hand-note {
+  justify-self: end;
+  text-align: right;
+}
+
+.hand-note {
+  max-width: 26ch;
+  color: #2b2b2b;
+  font-family: var(--font-hand);
+  font-size: 1.9rem;
+  line-height: 1.2;
+  transform: rotate(-3deg);
+}
+
+/* Süs çizimleri: sadece geniş ekranda */
+.doodle {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.doodle-heart {
+  top: 18%;
+  right: 4%;
+  stroke: #e0405e;
+  transform: rotate(12deg);
+}
+
+.doodle-squiggle {
+  top: 52%;
+  left: 2%;
+  width: 84px;
+  stroke: #2a6bd1;
+}
+
+.doodle-curl {
+  bottom: 8%;
+  right: 6%;
+  stroke: var(--color-brand-light);
+}
+
+.doodle-star {
+  top: 14%;
+  right: 8%;
+  stroke: #4caf6a;
+}
+
+.doodle-smile {
+  bottom: 10%;
+  left: 4%;
+  stroke: #e05a9a;
+}
+
+@media (max-width: 1100px) {
+  .doodle {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .story,
+  .recurring-item {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .story {
+    margin-top: 72px;
+  }
+
+  .story-reverse .story-text,
+  .recurring-reverse .polaroid {
+    order: 0;
+  }
+
+  .recurring-item .polaroid,
+  .recurring-reverse .polaroid {
+    justify-self: center;
+  }
+
+  .hand-note,
+  .recurring-reverse .hand-note {
+    justify-self: center;
+    text-align: center;
+  }
+
+  /* Telefonda panoda iki sütun */
+  .polaroid-wall {
+    gap: 32px 16px;
+  }
+
+  .wall-item {
+    flex-basis: calc(50% - 8px);
+  }
+
+  .wall-item .polaroid {
+    gap: 6px;
+    padding: 8px 8px 10px;
+  }
+
+  .wall-item .polaroid-caption {
+    font-size: 1.3rem;
+  }
+
+  .wall-item .tape {
+    left: calc(50% - 32px);
+    width: 64px;
+    height: 20px;
+  }
+
+  .polaroid-count {
+    top: 14px;
+    right: 14px;
+  }
+
+  .story-photo {
+    grid-column: 2 / 13;
+  }
+
+  .story-photo:nth-child(2) {
+    grid-column: 1 / 11;
+  }
+
+  .story-photo:nth-child(3) {
+    grid-column: 3 / 13;
+  }
+}
+
+/* Etkinliğin bütün fotoğrafları */
+.event-dialog {
+  width: min(960px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.event-dialog::backdrop {
+  background: rgba(15, 18, 24, 0.72);
+}
+
+html:has(.event-dialog[open]) {
+  overflow: hidden;
+}
+
+.event-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+
+.event-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.event-dialog-head h2 {
+  font-family: var(--font-hand);
+  font-size: 2.3rem;
+  font-weight: 700;
+}
+
+.event-dialog-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.event-dialog-photos img {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
 }
 
 /* Ana sayfa: resmi üyelik */

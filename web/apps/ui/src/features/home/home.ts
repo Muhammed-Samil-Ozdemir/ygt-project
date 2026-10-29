@@ -10,9 +10,10 @@ import { Icon, siteImageUrl } from '@ygt/libraries';
 import { AccentText } from '../../components/accent-text';
 import { SiteService } from '../../services/site';
 import { injectNow, timeLeft, timeParts } from '../../utils/countdown';
+import { HomeEvents } from './events/events';
 
 @Component({
-  imports: [AccentText, Icon, RouterLink],
+  imports: [AccentText, HomeEvents, Icon, RouterLink],
   templateUrl: './home.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

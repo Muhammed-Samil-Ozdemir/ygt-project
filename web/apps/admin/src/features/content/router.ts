@@ -19,6 +19,10 @@ const router: Routes = [
         loadComponent: () => import('./about/about'),
       },
       {
+        path: 'events',
+        loadComponent: () => import('./events/events'),
+      },
+      {
         path: 'team',
         loadComponent: () => import('./team/team'),
       },

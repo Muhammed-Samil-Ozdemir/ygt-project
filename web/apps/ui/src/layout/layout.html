@@ -31,6 +31,9 @@
       @if (texts && (content()?.about?.length || texts.joinUrl)) {
         <a class="nav-link" routerLink="/" fragment="about" (click)="closeMenu()">{{ texts.aboutTitle }}</a>
       }
+      @if (texts && content()?.events?.length) {
+        <a class="nav-link" routerLink="/" fragment="events" (click)="closeMenu()">{{ texts.eventsTitle }}</a>
+      }
       @if (texts && content()?.team?.length) {
         <a class="nav-link" routerLink="/" fragment="team" (click)="closeMenu()">{{ texts.teamTitle }}</a>
       }

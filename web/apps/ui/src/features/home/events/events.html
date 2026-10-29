@@ -1,0 +1,129 @@
+@if (wall().length || featured().length) {
+  <section class="section paper events-board">
+    <!-- Süs çizimleri -->
+    <svg class="doodle doodle-heart" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20.5s-7.5-4.6-9.4-9.4C1.2 7.4 4 4.2 7.2 4.6 9.4 4.9 10.9 6.6 12 8.4c1.1-1.8 2.6-3.5 4.8-3.8 3.2-.4 6 2.8 4.6 6.5-1.9 4.8-9.4 9.4-9.4 9.4z" />
+    </svg>
+    <svg class="doodle doodle-squiggle" viewBox="0 0 48 24" aria-hidden="true">
+      <path d="M2 16c4-12 8 8 12-2s8-8 10 2 8 10 12 0 6-8 10-2" />
+    </svg>
+    <svg class="doodle doodle-curl" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M4 22c6 0 10-4 10-9a5 5 0 0 0-10 0c0 7 8 11 14 9s10-8 10-14" />
+    </svg>
+
+    <div class="container">
+      <header class="board-head">
+        <span class="board-string" aria-hidden="true"></span>
+        <span class="pushpin board-pin" aria-hidden="true"></span>
+        <h2 class="board-title">{{ texts().eventsTitle }}</h2>
+      </header>
+
+      @if (wall().length) {
+        <ul class="polaroid-wall">
+          @for (event of wall(); track $index) {
+            <li class="wall-item">
+              @if (event.photos.length > 1) {
+                <span class="polaroid-stack" aria-hidden="true"></span>
+              }
+              <button type="button" class="polaroid" (click)="open(event)">
+                <span class="tape" aria-hidden="true"></span>
+                <img [src]="imageUrl(event.photos[0])" alt="" loading="lazy" />
+                <span class="polaroid-caption">{{ event.title }}</span>
+                @if (event.photos.length > 1) {
+                  <span class="polaroid-count">+{{ event.photos.length - 1 }} fotoğraf</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @for (item of featured(); track $index) {
+        <article class="story" [class.story-reverse]="$odd">
+          <div class="story-text">
+            <h3 class="story-title">{{ item.event.title }}</h3>
+            @if (item.event.description) {
+              <p class="story-description">
+                <span class="story-check" aria-hidden="true"><ygt-icon name="check" /></span>
+                <span class="pre-line">{{ item.event.description }}</span>
+              </p>
+            }
+            @if (item.event.photos.length > item.preview.length) {
+              <button type="button" class="btn btn-outline" (click)="open(item.event)">
+                Bütün fotoğraflar ({{ item.event.photos.length }})
+              </button>
+            }
+          </div>
+          <div class="story-photos">
+            @for (photo of item.preview; track $index) {
+              <button type="button" class="polaroid story-photo" [attr.aria-label]="item.event.title + ' fotoğraflarını aç'" (click)="open(item.event)">
+                <span class="pushpin" aria-hidden="true"></span>
+                <img [src]="imageUrl(photo)" alt="" loading="lazy" />
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+}
+
+@if (recurring().length) {
+  <section class="section paper events-recurring">
+    <svg class="doodle doodle-star" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 3l3 9 10-2-7 7 6 9-10-3-2 9-2-9-10 3 6-9-7-7 10 2z" />
+    </svg>
+    <svg class="doodle doodle-smile" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="13" />
+      <path d="M11 13v1M21 13v1M10 19c3 4 9 4 12 0" />
+    </svg>
+
+    <div class="container">
+      <header class="note-head">
+        <span class="board-string" aria-hidden="true"></span>
+        <div class="kraft-note">
+          <span class="pushpin" aria-hidden="true"></span>
+          <div class="kraft-paper">
+            <h2 class="board-title">{{ texts().recurringEventsTitle }}</h2>
+          </div>
+        </div>
+      </header>
+
+      <ul class="recurring-list">
+        @for (event of recurring(); track $index) {
+          <li class="recurring-item" [class.recurring-reverse]="$odd">
+            <button type="button" class="polaroid" (click)="open(event)">
+              <span class="pushpin pushpin-gold" aria-hidden="true"></span>
+              <img [src]="imageUrl(event.photos[0])" alt="" loading="lazy" />
+              <span class="polaroid-caption">{{ event.title }}</span>
+            </button>
+            @if (event.description) {
+              <p class="hand-note pre-line">{{ event.description }}</p>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  </section>
+}
+
+<dialog #dialog class="event-dialog" aria-labelledby="event-dialog-title" (close)="selected.set(null)" (click)="closeOnBackdrop($event)">
+  @if (selected(); as event) {
+    <div class="event-dialog-inner">
+      <header class="event-dialog-head">
+        <h2 id="event-dialog-title">{{ event.title }}</h2>
+        <button type="button" class="btn btn-ghost btn-icon" aria-label="Kapat" (click)="dialog.close()">
+          <ygt-icon name="x" />
+        </button>
+      </header>
+      @if (event.description) {
+        <p class="muted pre-line">{{ event.description }}</p>
+      }
+      <div class="event-dialog-photos">
+        @for (photo of event.photos; track $index) {
+          <img [src]="imageUrl(photo)" [alt]="event.title + ', fotoğraf ' + ($index + 1)" loading="lazy" />
+        }
+      </div>
+    </div>
+  }
+</dialog>

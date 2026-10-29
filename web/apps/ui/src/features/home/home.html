@@ -110,6 +110,10 @@
     </section>
   }
 
+  @if (site.events.length) {
+    <app-home-events id="events" [events]="site.events" [texts]="site.texts" />
+  }
+
   @if (site.team.length) {
     <section id="team" class="section section-alt">
       <div class="container">

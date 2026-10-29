@@ -18,6 +18,8 @@ export interface SiteTexts {
   /** Görsel */
   heroImage: string;
   aboutTitle: string;
+  eventsTitle: string;
+  recurringEventsTitle: string;
   teamTitle: string;
   technologiesTitle: string;
   linksTitle: string;
@@ -54,6 +56,18 @@ export interface AboutCard {
   image: string | null;
 }
 
+/** wall: etkinlik panosunda polaroid; featured: kendi bloğunda öne çıkan; recurring: geleneksel etkinlikler bölümünde. */
+export type SiteEventStyle = 'wall' | 'featured' | 'recurring';
+
+/** Ana sayfada fotoğraflarıyla gösterilen etkinlik. DOM'daki Event ile karışmasın diye SiteEvent. */
+export interface SiteEvent {
+  title: string;
+  description: string | null;
+  style: SiteEventStyle;
+  /** Fotoğrafların dosya adları, ilki kapak; adresi siteImageUrl() verir. Sitede en az bir fotoğraf olur. */
+  photos: string[];
+}
+
 export interface TeamMember {
   name: string;
   role: string;
@@ -70,6 +84,7 @@ export interface SiteLink {
 export interface SiteContent {
   texts: SiteTexts;
   about: AboutCard[];
+  events: SiteEvent[];
   team: TeamMember[];
   technologies: string[];
   links: SiteLink[];
@@ -110,6 +125,28 @@ export interface AboutCardListItem extends AboutCard {
 export interface AboutCardCommand {
   title: string;
   text: string;
+  isVisible: boolean;
+}
+
+export interface SiteEventPhoto {
+  id: string;
+  fileName: string;
+}
+
+export interface SiteEventListItem {
+  id: string;
+  title: string;
+  description: string | null;
+  style: SiteEventStyle;
+  /** Panelde fotoğrafı olmayan etkinlik de gelir; sitede gösterilmez. */
+  photos: SiteEventPhoto[];
+  isVisible: boolean;
+}
+
+export interface SiteEventCommand {
+  title: string;
+  description: string | null;
+  style: SiteEventStyle;
   isVisible: boolean;
 }
 

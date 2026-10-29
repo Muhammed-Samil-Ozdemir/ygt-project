@@ -38,11 +38,15 @@ export class HttpService {
     this.#send(this.#http.delete<T>(endpoint), callBack, errorCallBack, options);
   }
 
-  /** Dosyayı "file" alanında multipart/form-data olarak gönderir. */
-  upload<T>(endpoint: string, file: File, callBack: CallBack<T>, errorCallBack?: ErrorCallBack) {
+  /**
+   * Dosyayı "file" alanında multipart/form-data olarak gönderir. Var olan görseli değiştirirken PUT,
+   * yeni kayıt eklerken (ör. etkinliğe fotoğraf) POST kullanılır.
+   */
+  upload<T>(endpoint: string, file: File, callBack: CallBack<T>, errorCallBack?: ErrorCallBack, method: 'put' | 'post' = 'put') {
     const formData = new FormData();
     formData.append('file', file);
-    this.#send(this.#http.put<T>(endpoint, formData), callBack, errorCallBack);
+    const request = method === 'post' ? this.#http.post<T>(endpoint, formData) : this.#http.put<T>(endpoint, formData);
+    this.#send(request, callBack, errorCallBack);
   }
 
   /** Dosyayı indirir. Dosya adı sunucunun Content-Disposition başlığından alınır. */
