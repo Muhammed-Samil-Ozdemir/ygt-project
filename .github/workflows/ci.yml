@@ -1,0 +1,50 @@
+# Her push ve pull request'te API testleri, ön yüz derlemesi ve Docker imajları kontrol edilir.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  server:
+    name: API testleri
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # global.json (SDK sürümü ve test altyapısı) bu klasörde.
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: server/global.json
+      # Entegrasyon testleri SQL Server'ı Testcontainers ile Docker'da açar; Ubuntu makinelerinde Docker hazır gelir.
+      - run: dotnet test --project Ygt.WebAPI.Tests --configuration Release
+
+  web:
+    name: Ön yüz derlemesi
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      NX_DAEMON: "false"
+      NX_NO_CLOUD: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx nx run-many -t build -p ui admin
+
+  docker:
+    name: Docker imajları
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose build
