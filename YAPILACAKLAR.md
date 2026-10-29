@@ -4,7 +4,7 @@ Veritabanı, API, site, yönetim paneli, Docker kurulumu, sitenin içeriğinin p
 
 ## Tamamlananlar
 
-- [x] **Sitenin içeriğini panelden yönetmek.** Logo, sekme simgesi, giriş görseli, bütün metinler (giriş bölümü, bölüm başlıkları, "Bize katıl", resmi üyelik kartı, oyunlar bölümü, alt bilgi, başvuru sayfaları, teşekkür ve KVKK metni, sertifika notu, sayfa başlığı ve açıklaması), hakkımızda kartları (görselli), ekip (fotoğraf, sıralama, gizleme), teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden yönetiliyor. İçerik boş başlıyor, hazır veri ya da görsel yok. Kodda sadece arayüz yazıları (form etiketleri, butonlar gibi) var.
+- [x] **Sitenin içeriğini panelden yönetmek.** Logo, sekme simgesi, giriş görseli, bütün metinler (giriş bölümü, bölüm başlıkları, "Bize katıl", resmi üyelik kartı, oyunlar bölümü, alt bilgi, başvuru sayfaları, teşekkür ve KVKK metni, sertifika notu, sayfa başlığı ve açıklaması), hakkımızda kartları (görselli), etkinlikler (fotoğraflı; pano, öne çıkan ve geleneksel görünümleri), ekip (fotoğraf, sıralama, gizleme), teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden yönetiliyor. İçerik boş başlıyor, hazır veri ya da görsel yok. Kodda sadece arayüz yazıları (form etiketleri, butonlar gibi) var.
   - Sayfa başlığı ve açıklaması site açıldıktan sonra JavaScript ile değişiyor. Google bunu okuyor, ama bağlantı önizlemesi gösteren bazı uygulamalar (WhatsApp vb.) `web/apps/ui/src/index.html`'deki başlığı gösterebilir; topluluk adı değişirse orası da elle değiştirilmeli.
 - [x] `client/` klasörünü sil (Nx şablonundan kalma).
 - [x] **KVKK: başvuruların silinmesi.** Panelde başvurular tek tek ya da toplu silinebiliyor. Otomatik silme yok.
@@ -12,7 +12,7 @@ Veritabanı, API, site, yönetim paneli, Docker kurulumu, sitenin içeriğinin p
 ## 1. Yayına almadan önce
 
 - [ ] Sunucuya kurulum: Docker ile kurulum, HTTPS.
-- [ ] Site içeriğini panelden gir: logo, sekme simgesi, metinler, KVKK metni, resmi üyelik bağlantısı (`https://topluluk.ktun.edu.tr`), oyunlar bağlantısı (`https://ygt-mini-oyunlar.gt.tc`), ekip ve fotoğrafları, kartlar, teknolojiler, bağlantılar. Eski metinler ve KVKK metni `872b38b` commit'indeki `server/Ygt.WebAPI/Utilities/SiteTextCatalog.cs`'te, ekip fotoğrafları aynı commit'te `server/Ygt.WebAPI/SeedData/team` altında duruyor.
+- [ ] Site içeriğini panelden gir: logo, sekme simgesi, metinler, KVKK metni, resmi üyelik bağlantısı (`https://topluluk.ktun.edu.tr`), oyunlar bağlantısı (`https://ygt-mini-oyunlar.gt.tc`), geçmiş etkinlikler ve fotoğrafları, ekip ve fotoğrafları, kartlar, teknolojiler, bağlantılar. Eski metinler ve KVKK metni `872b38b` commit'indeki `server/Ygt.WebAPI/Utilities/SiteTextCatalog.cs`'te, ekip fotoğrafları aynı commit'te `server/Ygt.WebAPI/SeedData/team` altında duruyor.
 - [ ] `.env` içindeki geliştirme değerlerini değiştir: `MSSQL_SA_PASSWORD`, `JWT_SECRET_KEY`, `ADMIN_PASSWORD`.
 - [ ] Alan adını (`yazilimgelistirme.ktun.edu.tr`) eski Node sitesinden yeni sisteme geçir.
 - [ ] Yedekleme: `mssql-data` (veritabanı) ve `api-storage` (sertifika görselleri, panelden yüklenen site görselleri) volume'ları için düzenli yedek.

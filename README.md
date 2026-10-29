@@ -68,7 +68,7 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 |---|---|---|
 | POST | `/auth/login` | `{ email, password }` → `{ token, expiresAt }` |
 | GET | `/site/settings` | Ana sayfa butonu (`course` / `form`) ve geri sayım |
-| GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin; görsellerde dosya adı), `about`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla |
+| GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin; görsellerde dosya adı), `about`, `events`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla; fotoğrafı olmayan etkinlik gelmez |
 | GET | `/site/content/images/{dosya}` | Panelden yüklenen görsel (logo, ekip fotoğrafı, kart görseli...). Dosya adı her yüklemede değiştiği için uzun süre önbelleğe alınabilir |
 | POST | `/site/visits/{page}` | Ziyaret sayacını artırır (şimdilik sadece `home`) |
 | GET | `/courses/active` | Aktif eğitimler |
@@ -103,10 +103,13 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | PUT | `/certificates/{id}/image` | Görsel yükle (`multipart/form-data`, alan adı `file`, PNG/JPG/WEBP, en fazla 5 MB) |
 | GET, PUT | `/site/content/texts` | Tek parça metinler ve görseller: tanımları (etiket, tür, sınır, boşken yazılan ifade) ve değerleri / `{ values: { anahtar: metin } }` ile metinleri değiştirme |
 | PUT, DELETE | `/site/content/texts/{anahtar}/image` | Görsel alanına (`logo`, `favicon`, `heroImage`) görsel yükle (`certificates/{id}/image` ile aynı kurallar) / kaldır |
-| GET, POST | `/site/content/about`, `/team`, `/technologies`, `/links` | İçerik listesi (gizliler dahil), listenin sonuna yeni kayıt |
+| GET, POST | `/site/content/about`, `/events`, `/team`, `/technologies`, `/links` | İçerik listesi (gizliler dahil), listenin sonuna yeni kayıt |
 | PUT, DELETE | `/site/content/{liste}/{id}` | Kaydı düzenle, sil |
 | PUT | `/site/content/{liste}/order` | Sıralama: `{ ids: [...] }` ilk sıradan son sıraya |
 | PUT, DELETE | `/site/content/team/{id}/photo`, `/site/content/about/{id}/image` | Ekip fotoğrafı / kart görseli yükle (aynı kurallar) / kaldır |
+| POST | `/site/content/events/{id}/photos` | Etkinliğe fotoğraf ekle (aynı kurallar, etkinlik başına en fazla 12). Etkinliğin güncel hâli döner |
+| DELETE | `/site/content/events/{id}/photos/{fotoğrafId}` | Fotoğrafı sil |
+| PUT | `/site/content/events/{id}/photos/order` | Fotoğraf sırası; ilk fotoğraf kapak |
 
 ### Kurallar
 
@@ -133,6 +136,7 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | `SiteSettings` | `activePanels` + `activityCounters` | Tek satır: ana sayfa butonu ve geri sayım. |
 | `VisitorCounters` | `counters` | |
 | `SiteTexts` | — | Sitedeki tek parça metinler ve görseller (logo, sekme simgesi, giriş görseli), anahtar/değer. Anahtarlar `Utilities/SiteTextCatalog.cs`'te tanımlı. |
+| `Events`, `EventPhotos` | — | Ana sayfadaki etkinlikler ve fotoğrafları. `Style`: `Wall` (etkinlik panosu), `Featured` (öne çıkan), `Recurring` (geleneksel). Etkinlik silinince fotoğrafları da silinir. Başvuru alınan `Forms`'tan ayrıdır. |
 | `AboutCards`, `TeamMembers`, `Technologies`, `SiteLinks` | — | Ana sayfa listeleri. `SortOrder` ile sıralanır; teknolojiler dışındakiler gizlenebilir (`IsVisible`). Kartlarda isteğe bağlı görsel var. |
 | — | `sessions` | Kaldırıldı. Spam koruması istek sınırıyla yapılıyor. |
 
