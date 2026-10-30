@@ -28,7 +28,7 @@ KVKK silme işleri, yönetici yönetimi, sertifika araçları, yedekleme, testle
   - `getAllAppeal` düzeltmesini (`restAPI/index.js`) eski sunucuya yükle.
   - Repoda açıkta duran şifreleri (veritabanı, JWT anahtarı, admin) değiştir.
 - [ ] Hackathon KVKK metni "verileriniz en fazla 6 ay saklanacak" diyor, ama başvurular otomatik silinmiyor. Ya metin panelden güncellenmeli ya da süresi dolan başvurular panelden elle silinmeli.
-- [ ] Repo GitHub'a gönderildiğinde CI'ın ilk çalışmasının geçtiğini kontrol et (Actions sekmesi).
+- [x] Repo GitHub'a gönderildiğinde CI'ın ilk çalışmasının geçtiğini kontrol et (Actions sekmesi). Son çalışmaların hepsi başarılı.
 
 ## 2. İsteğe bağlı iyileştirmeler
 
