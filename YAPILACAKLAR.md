@@ -22,9 +22,11 @@ Kalanlar sunucuya erişim ya da karar gerektiren işler; önem sırasına göre 
 
 ## 1. Yayına almadan önce
 
-- [ ] **Sunucu:** Eski sistemin çalıştığı sunucuya (`yazilimgelistirme@161.9.217.71`, RHEL/CentOS ailesi; eski site Apache + Node ile `/var/www` altında) `YAYINA-ALMA.md`'deki adımlarla kur. Önce sunucunun sürümü, RAM'i (en az 2 GB) ve Docker durumu kontrol edilmeli. `.env`'i `scripts/init-env.sh` oluşturur.
+- [ ] **Sunucu:** Eski sistemin çalıştığı sunucuya (`yazilimgelistirme@161.9.217.71`; eski site Apache + Node ile `/var/www` altında) `YAYINA-ALMA.md`'deki adımlarla kur. `.env`'i `scripts/init-env.sh` oluşturur.
+  - Sunucu **CentOS 7** (Apache 2.4.6, OpenSSL 1.0.2, PHP 7.3; 2026-10-30'da dışarıdan kontrol edildi). CentOS 7'nin desteği 2024'te bitti: güvenlik güncellemesi yok, paket depoları arşive taşındı. Mümkünse bilgi işlemden yeni bir sanal makine (Rocky Linux 9, AlmaLinux 9 ya da Ubuntu 24.04) istenmeli; olmazsa Docker bu sunucuya kurulup denenecek.
+  - Eski sistemde `/phpmyadmin` herkese açık; Apache kapatılınca o da kapanır.
 - [ ] **Geçiş:** Eski sistem bırakılıyor (karar, 2026-10-30): Apache ve eski Node API kapatılır, 80/443'ü yeni sistemin Caddy'si alır. Eski veri (sertifikalar dahil) taşınmaz; eski sertifikaların doğrulama linkleri geçişten sonra "bulunamadı" der.
-- [ ] **Alan adı:** `yazilimgelistirme.ktun.edu.tr` bu sunucuyu göstermeli ve 80/443 internetten bu sunucuya ulaşmalı; yoksa HTTPS sertifikası alınamaz (gerekirse bilgi işlem).
+- [ ] **Alan adı (bilgi işlem):** `yazilimgelistirme.ktun.edu.tr` şu an DNS'te **yok**; üniversitenin kendi DNS sunucusu (ns2.ktun.edu.tr) da "böyle bir ad yok" diyor (2026-10-30). Sunucudaki Let's Encrypt sertifikası Ağustos'ta alındığına göre kayıt o zaman vardı, sonradan silinmiş. Bilgi işlemden A kaydı istenmeli: `yazilimgelistirme.ktun.edu.tr → 161.9.217.71`. Kayıt olmadan site alan adıyla açılmaz, HTTPS sertifikası da alınamaz. Sunucunun 80/443 portları internetten erişilebilir durumda.
 - [ ] Site içeriğini panelden tamamla. Hazır gelenleri kontrol et: "Bize katıl" Google Form bağlantısı hâlâ geçerli mi, KVKK metni güncel mi. Boş başlayanları gir: güncel ekip ve fotoğrafları, geçmiş etkinlikler ve fotoğrafları. İstenirse üyelik ve oyunlar bölümlerine açıklama, oyunlara görsel eklenebilir. Eski ekip ve galeri fotoğrafları `server/Ygt.WebAPI/SeedData/sample` altında duruyor.
 - [ ] Yedeklemeyi sunucuda zamanla: `crontab -e` ile `0 3 * * * cd /opt/ygt-project && bash scripts/backup.sh >> backups/backup.log 2>&1`. Yedekleri sunucu dışına da kopyala.
 - [ ] Hackathon KVKK metni "verileriniz en fazla 6 ay saklanacak" diyor, ama başvurular otomatik silinmiyor. Ya metin panelden güncellenmeli ya da süresi dolan başvurular panelden elle silinmeli.

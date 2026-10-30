@@ -5,7 +5,8 @@ name: ygt
 
 services:
   mssql:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+    # Eski çekirdekli sunucularda (ör. CentOS 7) 2025 açılmazsa .env'de MSSQL_IMAGE ile 2022'ye geçilebilir.
+    image: ${MSSQL_IMAGE:-mcr.microsoft.com/mssql/server:2025-latest}
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Express

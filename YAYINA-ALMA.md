@@ -14,7 +14,9 @@ Dışarıya sadece 80 ve 443 portları açılır. SQL Server, API ve nginx dış
 - **Sunucu:** Linux, 64 bit Intel/AMD işlemci (x86_64). SQL Server imajı ARM işlemcide çalışmaz.
   En az 2 GB RAM (SQL Server şartı), 4 GB önerilir. 20 GB boş disk yeter.
 - **Docker:** Docker Engine ve Compose eklentisi (2.24 ya da yenisi). Kurulum: https://docs.docker.com/engine/install/
-  (RHEL / Rocky / AlmaLinux için "RHEL", CentOS Stream için "CentOS" sayfası). Kurduktan sonra:
+  (RHEL / Rocky / AlmaLinux için "RHEL", CentOS için "CentOS" sayfası). CentOS 7'nin desteği bittiği için `yum`
+  depoları arşive (vault.centos.org) taşındı; `yum` "Could not retrieve mirrorlist" derse önce depolar arşive çevrilmeli.
+  Kurduktan sonra:
   `sudo systemctl enable --now docker` ve kullanıcıyı docker grubuna ekleyip (`sudo usermod -aG docker $USER`) yeniden bağlanın.
   Kurulduğunu kontrol etmek için: `docker compose version`
 - **Alan adı:** `yazilimgelistirme.ktun.edu.tr` için bir **A kaydı** sunucunun IP adresini göstermeli.
@@ -125,6 +127,7 @@ güncellemede kaybolmaz.
 | Caddy logunda sertifika hatası, site açılmıyor | A kaydı henüz bu sunucuyu göstermiyor ya da 80/443 kapalı. DNS değişikliğinin yayılması saatler sürebilir; düzelince Caddy kendisi tekrar dener. |
 | `docker compose up` "port is already allocated" ya da "address already in use" diyor | 80/443'ü hâlâ eski Apache (ya da başka bir program) tutuyor. `sudo ss -tlnp \| grep -E ':(80\|443)\s'` ile bakın, "Eski sistemi kapatma" adımını uygulayın. |
 | `mssql` "unhealthy" | RAM 2 GB'tan az olabilir ya da `MSSQL_SA_PASSWORD` kurala uymuyor. `docker compose logs mssql` |
+| `mssql` hiç açılmıyor, sürekli yeniden başlıyor (eski sunucu, ör. CentOS 7) | SQL Server 2025 eski Linux çekirdeğinde çalışmıyor olabilir. Veritabanı henüz boşken: `docker compose down -v`, `.env`'deki `#MSSQL_IMAGE=...2022-latest` satırının başındaki `#`'i kaldırın, `docker compose up -d mssql api web`. |
 | Panel şifresi unutuldu | `.env`'de `ADMIN_RESET_PASSWORD=true`, `docker compose up -d`, girişten sonra tekrar `false` ve `docker compose up -d`. |
 | Loglara bakmak | `docker compose logs -f api` (loglar servis başına en fazla 50 MB tutulur, eskiler silinir) |
 
