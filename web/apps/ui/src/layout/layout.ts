@@ -29,14 +29,18 @@ export default class Layout {
   /** Sayfa kaydırılınca üst menünün altına gölge düşer. */
   protected readonly scrolled = signal(false);
 
-  /** Admin panelindeki ayara göre üst menüde eğitim ya da etkinlik başvurusu gösterilir. Yazısı da panelden gelir. */
+  /**
+   * Admin panelindeki ayara göre üst menüde eğitim ya da etkinlik başvurusu gösterilir. Yazısı da panelden gelir.
+   * Açık eğitim ya da form yokken buton gösterilmez; ziyaretçi boş bir başvuru sayfasına düşmesin.
+   */
   protected readonly application = computed(() => {
     const texts = this.#site.content()?.texts;
-    if (!texts) {
+    const settings = this.#site.settings();
+    if (!texts || !settings?.applicationOpen) {
       return null;
     }
 
-    switch (this.#site.settings()?.homeButton) {
+    switch (settings.homeButton) {
       case 'course':
         return { label: texts.courseButton, link: '/appeal' };
       case 'form':

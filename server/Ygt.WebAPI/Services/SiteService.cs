@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Ygt.WebAPI.Context;
 using Ygt.WebAPI.Dtos;
+using Ygt.WebAPI.Enums;
 using Ygt.WebAPI.Utilities;
 
 namespace Ygt.WebAPI.Services;
@@ -15,7 +16,11 @@ public sealed class SiteService(AppDbContext dbContext)
             ? new CountdownDto(settings.CountdownTitle, settings.CountdownEndsAt.Value)
             : null;
 
-        return new SiteSettingsDto(settings.HomeButton, countdown);
+        var applicationOpen = settings.HomeButton == HomeButton.Course
+            ? await dbContext.Courses.AnyAsync(c => c.IsActive, cancellationToken)
+            : await dbContext.Forms.AnyAsync(f => f.IsActive, cancellationToken);
+
+        return new SiteSettingsDto(settings.HomeButton, countdown, applicationOpen);
     }
 
     public async Task UpdateSettingsAsync(SiteSettingsCommandDto request, CancellationToken cancellationToken)

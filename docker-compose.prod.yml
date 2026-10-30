@@ -1,0 +1,48 @@
+# Production eki: docker-compose.yml'nin üzerine uygulanır. Sunucuda .env'deki
+# COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml satırı sayesinde her "docker compose" komutunda
+# kendiliğinden kullanılır (yedekleme betikleri dahil). Kurulum adımları: YAYINA-ALMA.md
+#
+# - Caddy en önde durur: HTTPS sertifikasını alır, yeniler ve HTTP'yi HTTPS'e yönlendirir (Caddyfile).
+# - SQL Server ve web portları dışarıya kapatılır; dışarıya sadece Caddy'nin 80 ve 443 portları açılır.
+# - Konteyner logları dönüşümlü tutulur (servis başına en fazla 5 x 10 MB), disk dolmaz.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  mssql:
+    ports: !reset []
+    logging: *logging
+
+  api:
+    environment:
+      # İstemcinin IP'si Caddy ve nginx'ten geçerek gelir; istek sınırı gerçek IP'ye uygulansın diye iki kayda bakılır.
+      ForwardedHeaders__ForwardLimit: "2"
+    logging: *logging
+
+  web:
+    ports: !reset []
+    logging: *logging
+
+  caddy:
+    image: caddy:2.10-alpine
+    depends_on:
+      - web
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN .env dosyasında ayarlanmalı (ör. yazilimgelistirme.ktun.edu.tr)}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+    logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:

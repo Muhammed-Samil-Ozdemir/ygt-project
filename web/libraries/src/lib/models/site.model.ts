@@ -9,6 +9,8 @@ export interface SiteSettings {
   homeButton: HomeButton;
   /** Geri sayım ayarlanmamışsa null. */
   countdown: Countdown | null;
+  /** Butonun gösterdiği başvuru açık mı (açık eğitim ya da açık form var mı). Kapalıysa buton gösterilmez. */
+  applicationOpen: boolean;
 }
 
 export interface SiteSettingsCommand {

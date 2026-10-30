@@ -1,0 +1,26 @@
+# Production'da en önde durur (docker-compose.prod.yml):
+# - DOMAIN için Let's Encrypt sertifikasını kendisi alır ve süresi dolmadan yeniler (caddy-data volume'ünde saklanır).
+# - HTTP isteklerini HTTPS'e yönlendirir.
+# - İstekleri web (nginx) konteynerine aktarır. X-Forwarded-For'u istemcinin gerçek IP'siyle yeniden yazar;
+#   istemcinin gönderdiği sahte başlık API'ye ulaşmaz.
+{
+	# Sadece TCP 443: sunucuda UDP 443'ü (HTTP/3) ayrıca açmak gerekmesin.
+	servers {
+		protocols h1 h2
+	}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		# Tarayıcı bu siteye bir yıl boyunca sadece HTTPS ile bağlanır.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy web:80
+}

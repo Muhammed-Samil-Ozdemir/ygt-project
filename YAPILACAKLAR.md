@@ -1,7 +1,8 @@
 # Yapılacaklar
 
-Veritabanı, API, site, yönetim paneli, Docker kurulumu, sitenin içeriğinin panelden yönetilmesi, hazır başlangıç içeriği,
-KVKK silme işleri, yönetici yönetimi, sertifika araçları, yedekleme, testler ve CI tamam. Kalan işler önem sırasına göre aşağıda.
+Kodda yapılacak iş kalmadı: veritabanı, API, site, yönetim paneli, Docker kurulumu, içerik yönetimi, hazır başlangıç içeriği,
+KVKK silme işleri, yönetici yönetimi, sertifika araçları, yedekleme, testler, CI ve production eki (HTTPS) tamam.
+Kalanlar sunucuya erişim ya da karar gerektiren işler; önem sırasına göre aşağıda. Kurulum adımları: [YAYINA-ALMA.md](YAYINA-ALMA.md).
 
 ## Tamamlananlar
 
@@ -15,14 +16,16 @@ KVKK silme işleri, yönetici yönetimi, sertifika araçları, yedekleme, testle
 - [x] **Site içeriği: sürükle-bırak sıralama** (hakkımızda, etkinlikler, ekip, teknolojiler, bağlantılar). Dokunmatik ekranda oklar kullanılıyor.
 - [x] **Testler ve CI.** `server/Ygt.WebAPI.Tests`: girdi doğrulama birim testleri ve gerçek SQL Server'la (Testcontainers) entegrasyon testleri. `.github/workflows/ci.yml`: API testleri, ön yüz derlemesi, Docker imajları.
 - [x] **Hazır başlangıç içeriği.** İlk kurulumda (production dahil) eski sitenin içeriği gelir: metinler (giriş, "Bize katıl", alt bilgi, KVKK, sertifika notu, sayfa başlığı ve açıklaması), resmi üyelik ve oyunlar bağlantıları, logo ve sekme simgesi, hakkımızda kartları, teknolojiler, sosyal medya bağlantıları. Ekip ve etkinlikler boş başlar. Geliştirmede (ya da `.env`'de `SEED_SAMPLE_CONTENT=true` ile) ek olarak örnek veri gelir: eski ekip ve galeri fotoğraflarıyla etkinlikler, örnek eğitim, formlar, başvurular, sertifikalar. İçerik sadece veritabanı ilk kurulurken bir kez eklenir; panelden silinen geri gelmez, mevcut kurulumlar değişmez.
+- [x] **Production eki ve kurulum rehberi.** `docker-compose.prod.yml` + `Caddyfile`: önde Caddy (Let's Encrypt sertifikası otomatik, HTTP → HTTPS, güvenlik başlıkları), SQL Server ve web portları dışarıya kapalı, loglar dönüşümlü. İstek sınırı iki proxy arkasında da gerçek istemci IP'sine uygulanıyor (sahte başlıkla atlatılamadığı denendi). `scripts/init-env.sh` sunucu `.env`'ini rastgele şifrelerle oluşturuyor. Adımlar `YAYINA-ALMA.md`'de; yerelde `localhost` ile baştan sona denendi.
+- [x] **Başvuru butonu:** Üst menüdeki "Eğitim / Etkinlik Başvurusu" butonu artık sadece açık eğitim ya da form varken görünüyor.
 - [x] **Eski Node sistemindeki açık (kod).** `getAllAppeal` admin kontrolüne alındı (`ygt-api-main/restAPI/index.js`). Bu dosya bu reponun dışında; eski sunucuya ayrıca yüklenmesi gerekiyor (aşağıda).
 
 ## 1. Yayına almadan önce
 
-- [ ] Sunucuya kurulum: Docker ile kurulum, HTTPS.
+- [ ] **Sunucu:** Linux (x86_64, en az 2 GB RAM) bir sunucu bul ve `YAYINA-ALMA.md`'deki adımlarla kur. `.env`'i `scripts/init-env.sh` oluşturur (geliştirme şifreleri sunucuya gitmez).
+- [ ] **Alan adı:** `yazilimgelistirme.ktun.edu.tr` A kaydını yeni sunucuya yönlendir (muhtemelen bilgi işlem). Kayıt doğru olmadan HTTPS sertifikası alınamaz.
+- [ ] **Karar: eski sertifikalar.** Veri taşınmadığı için eski sistemde verilmiş sertifikaların doğrulama linkleri ve QR kodları geçişten sonra "bulunamadı" der. Kabul edilmiyorsa geçişten önce eski sertifikalar taşınmalı (eski MySQL dökümü gerekir; eski ID'ler `Certificates.Code`'a yazılırsa eski linkler çalışır).
 - [ ] Site içeriğini panelden tamamla. Hazır gelenleri kontrol et: "Bize katıl" Google Form bağlantısı hâlâ geçerli mi, KVKK metni güncel mi. Boş başlayanları gir: güncel ekip ve fotoğrafları, geçmiş etkinlikler ve fotoğrafları. İstenirse üyelik ve oyunlar bölümlerine açıklama, oyunlara görsel eklenebilir. Eski ekip ve galeri fotoğrafları `server/Ygt.WebAPI/SeedData/sample` altında duruyor.
-- [ ] `.env` içindeki geliştirme değerlerini değiştir: `MSSQL_SA_PASSWORD`, `JWT_SECRET_KEY`, `ADMIN_PASSWORD`.
-- [ ] Alan adını (`yazilimgelistirme.ktun.edu.tr`) eski Node sitesinden yeni sisteme geçir.
 - [ ] Yedeklemeyi sunucuda zamanla: `crontab -e` ile `0 3 * * * cd /opt/ygt-project && bash scripts/backup.sh >> backups/backup.log 2>&1`. Yedekleri sunucu dışına da kopyala.
 - [ ] Eski Node sistemi geçiş gününe kadar yayında kalacaksa:
   - `getAllAppeal` düzeltmesini (`restAPI/index.js`) eski sunucuya yükle.

@@ -7,6 +7,8 @@ KTÜN Yazılım Geliştirme Topluluğu sitesinin yeni sürümü. Eski Node.js/Ex
 | `server/` | ASP.NET Core 10 Web API (`Ygt.WebAPI`), EF Core + SQL Server |
 | `web/` | Angular 22 ön yüz, Nx monorepo: `apps/ui` (site), `apps/admin` (yönetim paneli), `libraries` (ortak kod) |
 | `docker-compose.yml` | SQL Server + API + web (nginx) |
+| `docker-compose.prod.yml`, `Caddyfile` | Production eki: önde HTTPS için Caddy, kapalı portlar, log sınırı ([YAYINA-ALMA.md](YAYINA-ALMA.md)) |
+| `scripts/` | Yedekleme, geri yükleme, sunucu için `.env` oluşturma |
 
 ## Çalıştırma
 
@@ -24,6 +26,8 @@ docker compose up -d --build
 | `http://localhost/api/` | API. Dışarıya ayrıca açılmaz, nginx üzerinden erişilir. Sağlık kontrolü: `/api/health` |
 
 80 portu doluysa `.env` içindeki `WEB_PORT` değiştirilir.
+
+Bu kurulum bilgisayarda denemek içindir (HTTP, SQL Server portu açık). Sunucuya HTTPS ile kurulum: [YAYINA-ALMA.md](YAYINA-ALMA.md).
 
 ### Geliştirme
 
@@ -96,7 +100,7 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 | Metot | Adres | Açıklama |
 |---|---|---|
 | POST | `/auth/login` | `{ email, password }` → `{ token, expiresAt }` |
-| GET | `/site/settings` | Ana sayfa butonu (`course` / `form`) ve geri sayım |
+| GET | `/site/settings` | Ana sayfa butonu (`course` / `form`), geri sayım ve `applicationOpen` (butonun gösterdiği eğitim ya da form açık mı; kapalıyken site butonu göstermez) |
 | GET | `/site/content` | Sitenin bütün içeriği tek istekte: `texts` (anahtar -> metin; görsellerde dosya adı), `about`, `events`, `team`, `technologies`, `links`. Sadece görünür kayıtlar, panelde verilen sırayla; fotoğrafı olmayan etkinlik gelmez |
 | GET | `/site/content/images/{dosya}` | Panelden yüklenen görsel (logo, ekip fotoğrafı, kart görseli...). Dosya adı her yüklemede değiştiği için uzun süre önbelleğe alınabilir |
 | POST | `/site/visits/{page}` | Ziyaret sayacını artırır (şimdilik sadece `home`) |
@@ -155,7 +159,7 @@ Admin uçları `Authorization: Bearer <token>` başlığını ister. Token `POST
 - Hackathon: takım adı formda tektir. Üye e-postaları `.edu` içermeli. Bir kişi aynı forma iki takımla başvuramaz. 3. üyenin bir alanı doluysa hepsi zorunludur.
 - Aynı anda tek aktif form olur. Yeni form açmak ya da formu yeniden açmak, açık olan formu kapatır.
 - Eğitim oluşturmak ana sayfa butonunu `course`, form açmak `form` yapar. Form kapanınca buton `course`'a döner (eski sistemdeki davranış).
-- İstek sınırı (IP başına, dakikada): 60 başvuru, 5 giriş denemesi. `appsettings.json` > `RateLimiting` ile değiştirilebilir.
+- İstek sınırı (IP başına, dakikada): 60 başvuru, 5 giriş denemesi. `appsettings.json` > `RateLimiting` ile değiştirilebilir. IP, önündeki proxy'lerin eklediği `X-Forwarded-For` başlığından okunur; kaç proxy olduğu `ForwardedHeaders:ForwardLimit` ile verilir (sadece nginx: 1, production'da Caddy + nginx: 2).
 - Başvurular otomatik silinmez. KVKK gereği silinmesi gerekenler panelden tek tek ya da toplu silinir (eğitim ve formun kendisi kalır).
 - Site içeriği düz metindir, HTML olarak yorumlanmaz. Bağlantılar sadece `http(s)` ve `mailto` olabilir.
 - İçerik listeleri panelde sürükle-bırakla ya da oklarla sıralanır (dokunmatik ekranda sadece oklar).
@@ -234,4 +238,5 @@ Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. E
 - [x] Yöneticiler ve şifre değiştirme, sertifikada Excel'den toplu ekleme ve QR kod, sürükle-bırak sıralama
 - [x] Yedekleme betikleri, testler ve CI
 - [x] İlk kurulumda hazır başlangıç içeriği, geliştirmede örnek veri
+- [x] Production eki: HTTPS (Caddy), kapalı portlar, log sınırı, `.env` oluşturma betiği, kurulum rehberi
 - [ ] Yayına alma ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)

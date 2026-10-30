@@ -62,11 +62,14 @@ builder.Services.ConfigureOptions<JwtSetupOptions>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddAuthorization();
 
-// Docker'da API, ön yüzü sunan nginx'in arkasında çalışacak. İstek sınırının gerçek istemci IP'sine
+// Docker'da API, ön yüzü sunan nginx'in arkasında çalışır. İstek sınırının gerçek istemci IP'sine
 // uygulanması için IP, X-Forwarded-For başlığından okunur. API portu dışarı açılmadığı sürece güvenli.
+// ForwardLimit: başlıktaki kaç proxy kaydına bakılacağı. Sadece nginx varken 1; production'da önde Caddy de
+// olduğu için 2 (docker-compose.prod.yml). Caddy, istemcinin gönderdiği sahte X-Forwarded-For'u siler.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardLimit = builder.Configuration.GetValue("ForwardedHeaders:ForwardLimit", 1);
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });

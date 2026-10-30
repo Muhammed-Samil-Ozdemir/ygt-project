@@ -1,2 +1,5 @@
 # Betikler Linux sunucuda çalışacak; Windows'ta da LF satır sonuyla kalsın.
 *.sh text eol=lf
+
+# Caddy yapılandırması da Linux konteynerinde okunur.
+Caddyfile text eol=lf

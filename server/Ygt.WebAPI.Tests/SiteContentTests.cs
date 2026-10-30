@@ -46,6 +46,27 @@ public sealed class SiteContentTests(ApiFactory factory)
         Assert.Equal(DefaultContent.Technologies, content.Technologies);
     }
 
+    [Fact]
+    public async Task Application_button_is_shown_only_while_an_application_is_open()
+    {
+        var admin = await factory.CreateAdminClientAsync();
+
+        // Form açmak ana sayfa butonunu "form" yapar; açık form olduğu için buton görünür.
+        var form = await (await admin.PostAsJsonAsync("/forms", new { title = $"Buton testi {TestApi.Unique()}" })).ReadAsync<IdBody>();
+        var open = await (await admin.GetAsync("/site/settings")).ReadAsync<SettingsBody>();
+        Assert.Equal("form", open.HomeButton);
+        Assert.True(open.ApplicationOpen);
+
+        // Form kapanınca buton "course"a döner; açık eğitim yoksa buton gizlenir.
+        (await admin.PostAsync($"/forms/{form.Id}/close", null)).EnsureSuccessStatusCode();
+        var closed = await (await admin.GetAsync("/site/settings")).ReadAsync<SettingsBody>();
+        var activeCourses = await (await admin.GetAsync("/courses/active")).ReadAsync<List<JsonElement>>();
+        Assert.Equal("course", closed.HomeButton);
+        Assert.Equal(activeCourses.Count > 0, closed.ApplicationOpen);
+    }
+
+    private sealed record SettingsBody(string HomeButton, bool ApplicationOpen);
+
     private sealed record SiteContentBody(
         Dictionary<string, string> Texts,
         List<JsonElement> About,
