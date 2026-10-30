@@ -59,6 +59,23 @@ public sealed class ImageStorageProvider(IOptions<StorageOptions> storageOptions
     public Task<string> SaveNewAsync(string folder, IFormFile? file, CancellationToken cancellationToken) =>
         SaveAsync(folder, Guid.NewGuid().ToString(), file, cancellationToken);
 
+    /// <summary>
+    /// Diskteki bir görseli (ör. SeedData'daki başlangıç görseli) klasöre yeni ve tekil bir adla kopyalar.
+    /// Böylece panelden yüklenen görsellerle aynı şekilde değiştirilip silinebilir. Kaydedilen dosya adını döndürür.
+    /// </summary>
+    public string CopyNew(string folder, string sourcePath)
+    {
+        var extension = Path.GetExtension(sourcePath).ToLowerInvariant();
+        if (!ContentTypes.ContainsKey(extension))
+            throw new InvalidOperationException($"Desteklenmeyen görsel türü: {sourcePath}");
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        Directory.CreateDirectory(DirectoryOf(folder));
+        File.Copy(sourcePath, PathOf(folder, fileName));
+
+        return fileName;
+    }
+
     public async Task<FileDto> ReadAsync(string folder, string? fileName, string notFoundMessage, CancellationToken cancellationToken)
     {
         var path = fileName is null ? null : PathOf(folder, fileName);

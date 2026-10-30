@@ -2,12 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Ygt.WebAPI.Models;
 using Ygt.WebAPI.Options;
+using Ygt.WebAPI.Providers;
 
 namespace Ygt.WebAPI.Context;
 
 /// <summary>
 /// Uygulama açılırken veritabanını hazırlar: bekleyen migration'ları uygular ve sistemin ihtiyaç duyduğu kayıtları
-/// (admin, site ayarları, ziyaret sayacı) ekler. Site içeriği eklenmez; panelden girilir. Her açılışta çalışır.
+/// (admin, site ayarları, ziyaret sayacı) ekler. İlk kurulumda sitenin başlangıç içeriğini de ekler. Her açılışta çalışır.
 /// </summary>
 public static class DbInitializer
 {
@@ -27,7 +28,10 @@ public static class DbInitializer
 
         var adminOptions = services.GetRequiredService<IOptions<AdminSeedOptions>>().Value;
         await SeedAdminAsync(dbContext, adminOptions, logger, cancellationToken);
-        await SeedSiteAsync(dbContext, logger, cancellationToken);
+
+        var seeder = new ContentSeeder(dbContext, services.GetRequiredService<ImageStorageProvider>(), logger);
+        var sampleContent = app.Configuration.GetValue("Seed:SampleContent", false);
+        await SeedSiteAsync(dbContext, seeder, sampleContent, logger, cancellationToken);
     }
 
     /// <summary>
@@ -74,13 +78,30 @@ public static class DbInitializer
             options.Email);
     }
 
-    /// <summary>Site ayarlarının tek satırını ve ana sayfa ziyaret sayacını oluşturur.</summary>
-    private static async Task SeedSiteAsync(AppDbContext dbContext, ILogger logger, CancellationToken cancellationToken)
+    /// <summary>
+    /// Site ayarlarının tek satırını ve ana sayfa ziyaret sayacını oluşturur.
+    /// Site ayarlarının satırı yoksa bu ilk kurulumdur: başlangıç içeriği (ve açıksa örnek veri) aynı kayıtta eklenir.
+    /// Böylece içerik sadece bir kez gelir; panelden silinen içerik yeniden başlatmada geri gelmez, içeriği girilmiş
+    /// mevcut veritabanlarına da dokunulmaz.
+    /// </summary>
+    private static async Task SeedSiteAsync(
+        AppDbContext dbContext,
+        ContentSeeder seeder,
+        bool sampleContent,
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         if (!await dbContext.SiteSettings.AnyAsync(cancellationToken))
         {
             dbContext.SiteSettings.Add(new SiteSetting());
-            logger.LogInformation("Site ayarları oluşturuldu.");
+            seeder.AddDefaultContent();
+            logger.LogInformation("İlk kurulum: site ayarları ve başlangıç içeriği oluşturuldu.");
+
+            if (sampleContent)
+            {
+                seeder.AddSampleContent();
+                logger.LogInformation("Örnek veri eklendi (Seed:SampleContent açık).");
+            }
         }
 
         if (!await dbContext.VisitorCounters.AnyAsync(c => c.Page == VisitorCounter.HomePage, cancellationToken))

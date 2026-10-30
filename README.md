@@ -51,7 +51,7 @@ npx nx serve admin            # http://localhost:4201/admin/
 
 Geliştirme sunucusu `/api` isteklerini `proxy.conf.json` ile `localhost:5146`'ya yönlendirir; Docker'daki nginx de aynı yolu kullanır.
 
-API her açılışta bekleyen migration'ları uygular ve gerekli kayıtları ekler: site ayarları, ana sayfa ziyaret sayacı ve ilk kurulumda (hiç yönetici yokken) `.env`'deki bilgilerle ilk yönetici.
+API her açılışta bekleyen migration'ları uygular ve gerekli kayıtları ekler: site ayarları, ana sayfa ziyaret sayacı ve ilk kurulumda (hiç yönetici yokken) `.env`'deki bilgilerle ilk yönetici. İlk kurulumda sitenin başlangıç içeriği de eklenir (aşağıda "Site içeriği").
 Sonrasında yöneticiler ve şifreler panelden ("Yöneticiler", "Hesabım") yönetilir; `.env`'deki şifreyi değiştirmek mevcut yöneticiyi etkilemez.
 Şifre unutulursa `.env`'de `ADMIN_RESET_PASSWORD=true` yapıp `docker compose up -d` çalıştırılır: `ADMIN_EMAIL` yöneticisinin şifresi `ADMIN_PASSWORD` olur. Giriş yaptıktan sonra ayar `false`'a geri alınmalı.
 
@@ -75,7 +75,15 @@ bash scripts/restore.sh backups/<tarih>     # yedeği geri yükler (mevcut verin
 Sunucuda her gece yedek için `crontab -e` ile: `0 3 * * * cd /opt/ygt-project && bash scripts/backup.sh >> backups/backup.log 2>&1`.
 14 günden eski yedekler silinir (`KEEP_DAYS` ile değişir). Yedekleri ayrıca sunucu dışına da kopyalayın.
 
-Site içeriği boş başlar: logo, sekme simgesi, bütün metinler, hakkımızda kartları, ekip, teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden girilir.
+### Site içeriği
+
+Logo, sekme simgesi, bütün metinler, hakkımızda kartları, etkinlikler, ekip, teknolojiler ve bağlantılar panelde "Site içeriği" bölümünden yönetilir.
+Site boş açılmasın diye ilk kurulumda (production dahil) eski sitenin içeriği eklenir: topluluk adı ve giriş metinleri, "Bize katıl" metni ve bağlantısı, resmi üyelik ve oyunlar bağlantıları, alt bilgi, KVKK metni, sertifika notu, logo ve sekme simgesi, hakkımızda kartları, teknolojiler ve sosyal medya bağlantıları (`server/Ygt.WebAPI/Context/DefaultContent.cs`). Ekip ve etkinlikler boş başlar.
+
+Geliştirmede (`appsettings.Development.json`) ya da Docker'da `.env`'de `SEED_SAMPLE_CONTENT=true` ile bunlara ek olarak örnek veri gelir: eski sitedeki ekip ve galeri fotoğraflarıyla etkinlikler, örnek eğitim, formlar, başvurular ve sertifikalar (`Context/SampleContent.cs`, görseller `SeedData/` altında). Sunucuda bu ayar kapalı kalmalı.
+
+Başlangıç içeriği sadece bir kez, veritabanı ilk kurulurken (site ayarlarının satırıyla birlikte) eklenir. Panelden değiştirilen ya da silinen içerik yeniden başlatmada geri gelmez; kurulu bir veritabanında bu ayarları değiştirmek bir şey eklemez. Docker'da baştan kurmak için `docker compose down -v` gerekir (bütün veriyi ve görselleri siler).
+
 Boş bırakılan yazı ve görsel sitede gösterilmez. Bölüm başlıkları gibi bazı alanlarda boşken genel bir ifade ("Hakkımızda") yazılır; bunlar `Utilities/SiteTextCatalog.cs`'te `Placeholder` olarak tanımlı.
 
 ## API
@@ -188,7 +196,8 @@ server/Ygt.WebAPI/
   Models/           Entity'ler
   Enums/            FormType, HomeButton, SiteTextKind
   Configurations/   EF Core tablo ayarları (IEntityTypeConfiguration)
-  Context/          AppDbContext, açılışta migration + seed
+  Context/          AppDbContext, açılışta migration + seed, başlangıç içeriği ve örnek veri
+  SeedData/         İlk kurulumda kopyalanan görseller: logo (default/), örnek ekip ve etkinlik fotoğrafları (sample/)
   Migrations/
   Dtos/             İstek ve yanıt kayıtları (record)
   Services/         İş kuralları; DbContext'i doğrudan kullanır
@@ -224,4 +233,5 @@ Eski sitenin adresleri (`/appeal`, `/form`, `/hackathon`, `/counter`) korunur. E
 - [x] KVKK: başvuruları panelden silme
 - [x] Yöneticiler ve şifre değiştirme, sertifikada Excel'den toplu ekleme ve QR kod, sürükle-bırak sıralama
 - [x] Yedekleme betikleri, testler ve CI
+- [x] İlk kurulumda hazır başlangıç içeriği, geliştirmede örnek veri
 - [ ] Yayına alma ve diğer işler: [YAPILACAKLAR.md](YAPILACAKLAR.md)

@@ -22,4 +22,9 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- İlk kurulumda storage'a kopyalanan başlangıç görselleri (logo, örnek ekip ve etkinlik fotoğrafları). -->
+    <None Update="SeedData\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

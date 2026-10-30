@@ -31,6 +31,7 @@ services:
       Seed__Admin__Email: ${ADMIN_EMAIL:-admin@ygt.com}
       Seed__Admin__Password: ${ADMIN_PASSWORD:?ADMIN_PASSWORD .env dosyasında ayarlanmalı}
       Seed__Admin__ResetPassword: ${ADMIN_RESET_PASSWORD:-false}
+      Seed__SampleContent: ${SEED_SAMPLE_CONTENT:-false}
     # Sertifika görselleri ve panelden yüklenen site görselleri (logo, ekip fotoğrafları...).
     volumes:
       - api-storage:/app/storage

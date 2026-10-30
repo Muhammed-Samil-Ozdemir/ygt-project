@@ -26,8 +26,9 @@ public sealed record SiteTextDefinition
 }
 
 /// <summary>
-/// Sitedeki tek parça metinlerin ve görsellerin (logo, sekme simgesi...) listesi. Başlangıçta hepsi boştur,
-/// panelden girilir. Yeni alan eklemek için buraya tanım eklemek yeterli; panel alanı kendiliğinden gösterir.
+/// Sitedeki tek parça metinlerin ve görsellerin (logo, sekme simgesi...) listesi. Bir kısmı ilk kurulumda eski sitenin
+/// içeriğiyle gelir (Context/DefaultContent), gerisi boş başlar; hepsi panelden değiştirilir.
+/// Yeni alan eklemek için buraya tanım eklemek yeterli; panel alanı kendiliğinden gösterir.
 /// Ön yüzde kullanmak için libraries'deki SiteTexts arayüzüne de eklenmeli.
 /// </summary>
 public static class SiteTextCatalog
