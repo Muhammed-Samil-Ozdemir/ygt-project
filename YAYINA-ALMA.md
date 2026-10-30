@@ -14,12 +14,16 @@ Dışarıya sadece 80 ve 443 portları açılır. SQL Server, API ve nginx dış
 - **Sunucu:** Linux, 64 bit Intel/AMD işlemci (x86_64). SQL Server imajı ARM işlemcide çalışmaz.
   En az 2 GB RAM (SQL Server şartı), 4 GB önerilir. 20 GB boş disk yeter.
 - **Docker:** Docker Engine ve Compose eklentisi (2.24 ya da yenisi). Kurulum: https://docs.docker.com/engine/install/
+  (RHEL / Rocky / AlmaLinux için "RHEL", CentOS Stream için "CentOS" sayfası). Kurduktan sonra:
+  `sudo systemctl enable --now docker` ve kullanıcıyı docker grubuna ekleyip (`sudo usermod -aG docker $USER`) yeniden bağlanın.
   Kurulduğunu kontrol etmek için: `docker compose version`
 - **Alan adı:** `yazilimgelistirme.ktun.edu.tr` için bir **A kaydı** sunucunun IP adresini göstermeli.
   Bu kayıt muhtemelen üniversitenin bilgi işlem birimi tarafından değiştirilir. Kayıt doğru olmadan sertifika alınamaz.
   Kontrol: `nslookup yazilimgelistirme.ktun.edu.tr` sunucunun IP'sini vermeli.
 - **Güvenlik duvarı:** TCP 80 ve 443 dışarıdan açık olmalı (80, sertifika alırken ve HTTPS'e yönlendirmek için gerekli).
-  Ubuntu'da `ufw` kullanılıyorsa: `sudo ufw allow 80/tcp && sudo ufw allow 443/tcp` (SSH'ı kapatmamaya dikkat).
+  Eski site bu sunucuda yayındaysa büyük ihtimalle zaten açıktır.
+  RHEL ailesinde (firewalld): `sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload`
+  Ubuntu'da (ufw): `sudo ufw allow 80/tcp && sudo ufw allow 443/tcp` (SSH'ı kapatmamaya dikkat).
 
 ## 2. Kurulum
 
@@ -32,9 +36,39 @@ cd /opt/ygt-project
 # .env: şifreler ve JWT anahtarı rastgele üretilir, yönetici şifresi ekrana bir kez yazılır (not alın)
 bash scripts/init-env.sh yazilimgelistirme.ktun.edu.tr <yönetici-e-postası>
 
-# Başlat (ilk derleme birkaç dakika sürer)
-docker compose up -d --build
+# İmajları önceden derle (birkaç dakika sürer; eski site bu sırada açık kalır)
+docker compose build
 ```
+
+### Eski sistemi kapatma
+
+Eski site (Apache + Node API, `/var/www` altında) bu sunucuda çalışıyorsa 80/443 portlarını o tutuyordur; yeni sistemin
+Caddy'si başlamadan önce kapatılmalı. Eski veri taşınmıyor; dosyalar `/var/www`'de kalır, silmek gerekmez.
+
+```bash
+# Apache: kapatılır ve sunucu yeniden başlayınca açılmaz.
+# Dikkat: Apache'de başka bir site daha varsa o da kapanır (ls /etc/httpd/conf.d/ ile kontrol edin).
+sudo systemctl disable --now httpd
+
+# Eski Node API: nasıl çalıştığına bakın
+ps -eo user,cmd | grep -E 'node|pm2' | grep -v grep
+#   pm2 ile çalışıyorsa:     pm2 delete all && pm2 save
+#   systemd servisiyse:      sudo systemctl disable --now <servis-adı>
+
+# Eski veritabanı artık gerekmiyorsa RAM boşaltmak için (veriler diskte kalır):
+sudo systemctl disable --now mysqld 2>/dev/null || sudo systemctl disable --now mariadb
+
+# 80 ve 443 boşaldı mı? (çıktı boş olmalı)
+sudo ss -tlnp | grep -E ':(80|443)\s'
+```
+
+### Başlatma
+
+```bash
+docker compose up -d
+```
+
+Kesinti, eski sistemin kapatılmasından bu komutun bitmesine ve Caddy'nin sertifikayı almasına kadar geçen birkaç dakikadır.
 
 Repo gizliyse `git clone` için GitHub girişi gerekir (ör. sunucuda `gh auth login` ya da bir deploy key).
 
@@ -89,6 +123,7 @@ güncellemede kaybolmaz.
 | Belirti | Neden / çözüm |
 |---|---|
 | Caddy logunda sertifika hatası, site açılmıyor | A kaydı henüz bu sunucuyu göstermiyor ya da 80/443 kapalı. DNS değişikliğinin yayılması saatler sürebilir; düzelince Caddy kendisi tekrar dener. |
+| `docker compose up` "port is already allocated" ya da "address already in use" diyor | 80/443'ü hâlâ eski Apache (ya da başka bir program) tutuyor. `sudo ss -tlnp \| grep -E ':(80\|443)\s'` ile bakın, "Eski sistemi kapatma" adımını uygulayın. |
 | `mssql` "unhealthy" | RAM 2 GB'tan az olabilir ya da `MSSQL_SA_PASSWORD` kurala uymuyor. `docker compose logs mssql` |
 | Panel şifresi unutuldu | `.env`'de `ADMIN_RESET_PASSWORD=true`, `docker compose up -d`, girişten sonra tekrar `false` ve `docker compose up -d`. |
 | Loglara bakmak | `docker compose logs -f api` (loglar servis başına en fazla 50 MB tutulur, eskiler silinir) |
@@ -96,11 +131,9 @@ güncellemede kaybolmaz.
 **Önemli:** `docker compose down -v` bütün veriyi, görselleri ve sertifikaları siler. Sunucuda kullanmayın;
 durdurmak için `docker compose down` (volume'ler kalır) yeterli.
 
-## Geçiş günü
+## Eski sistem hakkında
 
-- Eski Node sitesi kapanacaksa: alan adını yeni sunucuya yönlendirin. DNS değişikliğinden bir gün önce kaydın TTL'ini
-  düşürmek (ör. 300 saniye), geçişi hızlandırır.
-- **Eski sertifikalar:** Veri taşınmadığı için eski sistemde verilmiş sertifikaların doğrulama linkleri (ve QR kodları)
-  geçişten sonra "bulunamadı" der. Kabul edilmiyorsa geçişten önce eski sertifikaların taşınması gerekir
-  (eski ID'ler `Certificates.Code` sütununa yazılırsa eski linkler aynen çalışır).
-- Eski sistem geçişe kadar açık kalacaksa `getAllAppeal` düzeltmesi oraya yüklenmeli ve eski repodaki şifreler değiştirilmeli.
+- Eski sistem bırakıldı; verisi (başvurular, sertifikalar) taşınmadı. Eski sertifikaların doğrulama linkleri ve QR kodları
+  geçişten sonra "bulunamadı" der. Eski panel adresleri (`/api/admin/...`) de artık çalışmaz.
+- Yeni sistem başka bir sunucuya kurulursa alan adının DNS kaydı oraya yönlendirilmeli. Değişiklikten bir gün önce
+  kaydın TTL'ini düşürmek (ör. 300 saniye) geçişi hızlandırır.
