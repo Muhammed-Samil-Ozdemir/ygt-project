@@ -9,7 +9,9 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-RUN npx nx run-many -t build -p ui admin
+# Nx, derleme sırasında .nx altında bir SQLite veritabanı tutar. Eski çekirdekli sunucularda (ör. CentOS 7)
+# Docker'ın dosya sistemi bu veritabanına yazamıyor ("disk I/O error"); klasör bellekte (tmpfs) tutulur.
+RUN --mount=type=tmpfs,target=/app/.nx npx nx run-many -t build -p ui admin
 
 FROM nginx:1.29-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
