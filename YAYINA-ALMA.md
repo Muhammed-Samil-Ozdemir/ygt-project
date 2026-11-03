@@ -128,7 +128,8 @@ güncellemede kaybolmaz.
 | `docker compose up` "port is already allocated" ya da "address already in use" diyor | 80/443'ü hâlâ eski Apache (ya da başka bir program) tutuyor. `sudo ss -tlnp \| grep -E ':(80\|443)\s'` ile bakın, "Eski sistemi kapatma" adımını uygulayın. |
 | `mssql` "unhealthy" | RAM 2 GB'tan az olabilir ya da `MSSQL_SA_PASSWORD` kurala uymuyor. `docker compose logs mssql` |
 | API açılmıyor, logda SQL Server'a "pre-login handshake" zaman aşımı var (eski sunucu, ör. CentOS 7) | Eski çekirdekte Docker'ın sanal ağı konteynerler arasında veri iletmiyor. `.env`'de `COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.hostnet.yml` yapın, sonra `docker compose down && docker compose up -d`. Servisler sunucunun ağını kullanır ve 127.0.0.1 üzerinden bağlanır; dışarıya yine sadece 80/443 açılır. |
-| `mssql` hiç açılmıyor, sürekli yeniden başlıyor (eski sunucu, ör. CentOS 7) | SQL Server 2025 eski Linux çekirdeğinde çalışmıyor olabilir. Veritabanı henüz boşken: `docker compose down -v`, `.env`'deki `#MSSQL_IMAGE=...2022-latest` satırının başındaki `#`'i kaldırın, `docker compose up -d mssql api web`. |
+| `mssql` hiç açılmıyor, sürekli yeniden başlıyor ya da API bağlanınca çöküyor (eski sunucu, ör. CentOS 7) | SQL Server 2025 ve 2022 eski Linux çekirdeğinde (3.10) çalışmıyor; 2019 çalışıyor. Veritabanı henüz boşken: `docker compose down -v`, `.env`'de `MSSQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest`, `docker compose up -d mssql api web`. |
+| **CentOS 7 sunucusunda çalışan ayar (2026-11-03)** | `.env`'de `COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.hostnet.yml` ve `MSSQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest`. |
 | Panel şifresi unutuldu | `.env`'de `ADMIN_RESET_PASSWORD=true`, `docker compose up -d`, girişten sonra tekrar `false` ve `docker compose up -d`. |
 | Loglara bakmak | `docker compose logs -f api` (loglar servis başına en fazla 50 MB tutulur, eskiler silinir) |
 
