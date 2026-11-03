@@ -2,16 +2,19 @@
 # Kök dizindeki docker-compose.yml tarafından derlenir.
 FROM node:22-alpine AS build
 WORKDIR /app
-ENV NX_DAEMON=false NX_NO_CLOUD=true
+ENV NG_CLI_ANALYTICS=false
 
 # Önce sadece paket dosyaları; bağımlılıklar değişmedikçe bu katman önbellekten gelir.
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-# Nx, derleme sırasında .nx altında bir SQLite veritabanı tutar. Eski çekirdekli sunucularda (ör. CentOS 7)
-# Docker'ın dosya sistemi bu veritabanına yazamıyor ("disk I/O error"); klasör bellekte (tmpfs) tutulur.
-RUN --mount=type=tmpfs,target=/app/.nx npx nx run-many -t build -p ui admin
+# Derleme Nx yerine doğrudan Angular CLI ile yapılır: Nx'in kullandığı SQLite veritabanı eski çekirdekli
+# sunucularda (ör. CentOS 7) "disk I/O error" veriyor. Ayarlar apps/*/project.json'dan okunur (tools/angular-json.mjs).
+# Bilgisayarda geliştirme ve CI yine Nx ile çalışır.
+RUN node tools/angular-json.mjs ui admin \
+ && npx ng build ui \
+ && npx ng build admin
 
 FROM nginx:1.29-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
