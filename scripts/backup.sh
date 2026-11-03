@@ -35,7 +35,7 @@ fi
 
 echo "Veritabanı yedekleniyor..."
 docker compose exec -T mssql mkdir -p /var/opt/mssql/backup
-docker compose exec -T mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b \
+docker compose exec -T mssql /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P "$SA_PASSWORD" -C -b \
   -Q "BACKUP DATABASE [Ygt] TO DISK = N'/var/opt/mssql/backup/ygt.bak' WITH INIT, CHECKSUM"
 docker compose cp mssql:/var/opt/mssql/backup/ygt.bak "$TARGET/ygt.bak"
 

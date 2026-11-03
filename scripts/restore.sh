@@ -38,7 +38,7 @@ trap 'docker compose start api >/dev/null' EXIT
 echo "Veritabanı geri yükleniyor..."
 docker compose exec -T mssql mkdir -p /var/opt/mssql/backup
 docker compose cp "$SOURCE/ygt.bak" mssql:/var/opt/mssql/backup/restore.bak
-docker compose exec -T mssql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$SA_PASSWORD" -C -b -Q "
+docker compose exec -T mssql /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P "$SA_PASSWORD" -C -b -Q "
   IF DB_ID('Ygt') IS NOT NULL ALTER DATABASE [Ygt] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
   RESTORE DATABASE [Ygt] FROM DISK = N'/var/opt/mssql/backup/restore.bak' WITH REPLACE;
   ALTER DATABASE [Ygt] SET MULTI_USER;"

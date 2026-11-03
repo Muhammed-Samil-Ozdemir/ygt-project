@@ -22,5 +22,6 @@
 		-Server
 	}
 
-	reverse_proxy web:80
+	# UPSTREAM: sunucunun ağıyla çalışırken (docker-compose.hostnet.yml) 127.0.0.1:8081; yoksa web konteyneri.
+	reverse_proxy {$UPSTREAM:web:80}
 }

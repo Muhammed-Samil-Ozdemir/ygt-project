@@ -1,0 +1,34 @@
+# Eski çekirdekli sunucular için ek (ör. CentOS 7, çekirdek 3.10): orada Docker'ın sanal ağı konteynerler
+# arasında bağlantıyı kuruyor ama veriyi iletmiyor (API, SQL Server'a "pre-login handshake" zaman aşımıyla
+# bağlanamıyor). Bu ekle bütün servisler sunucunun kendi ağını kullanır ve birbirine 127.0.0.1 üzerinden bağlanır.
+#
+# docker-compose.prod.yml'nin üzerine uygulanır; .env'de:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.hostnet.yml
+#
+# Dışarıya yine sadece Caddy (80/443) açılır. SQL Server, API ve nginx sadece 127.0.0.1'de dinler:
+#   SQL Server 127.0.0.1:1433, API 127.0.0.1:5080, nginx 127.0.0.1:8081
+
+services:
+  mssql:
+    network_mode: host
+    ports: !reset []
+    environment:
+      MSSQL_IP_ADDRESS: 127.0.0.1
+
+  api:
+    network_mode: host
+    environment:
+      ConnectionStrings__SqlServer: "Server=127.0.0.1,1433;Database=Ygt;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;"
+      ASPNETCORE_URLS: http://127.0.0.1:5080
+
+  web:
+    network_mode: host
+    environment:
+      NGINX_LISTEN: 127.0.0.1:8081
+      API_UPSTREAM: 127.0.0.1:5080
+
+  caddy:
+    network_mode: host
+    ports: !reset []
+    environment:
+      UPSTREAM: 127.0.0.1:8081
